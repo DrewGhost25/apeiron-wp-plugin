@@ -1,0 +1,559 @@
+/* ============================================================
+   Apeiron Paywall — Stile dark, coerente con apeiron-reader.com
+   ============================================================ */
+
+:root {
+	--apeiron-bg:       #0d0d0d;
+	--apeiron-bg-card:  #141414;
+	--apeiron-border:   #2a2a2a;
+	--apeiron-accent:   #c8a96e;
+	--apeiron-accent-h: #d4b87a;
+	--apeiron-text:     #e8e8e8;
+	--apeiron-muted:    #888888;
+	--apeiron-success:  #27ae60;
+	--apeiron-error:    #e74c3c;
+	--apeiron-font:     Georgia, 'Times New Roman', serif;
+	--apeiron-radius:   8px;
+}
+
+/* ── Paywall container ──────────────────────────────────────── */
+
+#apeiron-paywall {
+	position:         relative;
+	margin:           2rem 0;
+	font-family:      var(--apeiron-font);
+}
+
+/* Fade overlay che copre la fine del testo preview */
+.apeiron-fade {
+	position:   relative;
+	margin-top: -3rem;
+	height:     4rem;
+	background: linear-gradient(
+		to bottom,
+		transparent 0%,
+		var(--apeiron-bg, #0d0d0d) 100%
+	);
+	pointer-events: none;
+}
+
+/* Card centrale */
+.apeiron-card {
+	background:    var(--apeiron-bg-card);
+	border:        1px solid var(--apeiron-border);
+	border-radius: var(--apeiron-radius);
+	padding:       2.5rem 2rem;
+	max-width:     480px;
+	margin:        0 auto;
+	text-align:    center;
+	box-shadow:    0 4px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Logo ───────────────────────────────────────────────────── */
+
+.apeiron-logo {
+	display:       inline-flex;
+	align-items:   center;
+	gap:           0.5rem;
+	margin-bottom: 1.25rem;
+	color:         var(--apeiron-accent);
+	font-size:     0.8rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.apeiron-logo svg {
+	width:  20px;
+	height: 20px;
+	fill:   var(--apeiron-accent);
+}
+
+/* ── Testi ──────────────────────────────────────────────────── */
+
+.apeiron-title {
+	font-size:     1.35rem;
+	font-weight:   normal;
+	color:         var(--apeiron-text);
+	margin:        0 0 0.5rem;
+	letter-spacing: 0.02em;
+}
+
+.apeiron-price {
+	font-size:   1rem;
+	color:       var(--apeiron-accent);
+	margin:      0 0 1.75rem;
+	font-style:  italic;
+}
+
+/* ── Bottoni ────────────────────────────────────────────────── */
+
+.apeiron-btn {
+	display:         inline-flex;
+	align-items:     center;
+	justify-content: center;
+	gap:             0.5rem;
+	padding:         0.75rem 1.75rem;
+	border:          none;
+	border-radius:   var(--apeiron-radius);
+	font-family:     var(--apeiron-font);
+	font-size:       0.95rem;
+	cursor:          pointer;
+	transition:      background 0.2s, opacity 0.2s;
+	text-decoration: none;
+}
+
+.apeiron-btn-primary {
+	background: var(--apeiron-accent);
+	color:      #0d0d0d;
+}
+
+.apeiron-btn-primary:hover:not(:disabled) {
+	background: var(--apeiron-accent-h);
+}
+
+.apeiron-btn-secondary {
+	background:    transparent;
+	color:         var(--apeiron-muted);
+	border:        1px solid var(--apeiron-border);
+	margin-top:    0.75rem;
+	font-size:     0.85rem;
+}
+
+.apeiron-btn-secondary:hover:not(:disabled) {
+	color:  var(--apeiron-text);
+	border-color: var(--apeiron-muted);
+}
+
+.apeiron-btn:disabled {
+	opacity: 0.5;
+	cursor:  not-allowed;
+}
+
+.apeiron-btn.connected {
+	background: transparent;
+	border:     1px solid var(--apeiron-accent);
+	color:      var(--apeiron-accent);
+	font-size:  0.85rem;
+	padding:    0.5rem 1rem;
+}
+
+#apeiron-pay-btn {
+	display:    none;
+	margin-top: 0.75rem;
+	width:      100%;
+}
+
+/* ── Icona MetaMask ─────────────────────────────────────────── */
+
+.apeiron-mm-icon {
+	width:  20px;
+	height: 20px;
+}
+
+/* ── Steps ──────────────────────────────────────────────────── */
+
+.apeiron-steps {
+	display:         flex;
+	justify-content: center;
+	gap:             1.5rem;
+	margin:          1.5rem 0 1.25rem;
+	list-style:      none;
+	padding:         0;
+}
+
+.apeiron-steps li {
+	font-size:  0.75rem;
+	color:      var(--apeiron-muted);
+	text-align: center;
+	display:    flex;
+	flex-direction: column;
+	align-items: center;
+	gap:        0.3rem;
+}
+
+.apeiron-steps li .step-num {
+	width:         22px;
+	height:        22px;
+	border-radius: 50%;
+	border:        1px solid var(--apeiron-border);
+	display:       flex;
+	align-items:   center;
+	justify-content: center;
+	font-size:     0.7rem;
+	color:         var(--apeiron-accent);
+}
+
+/* ── Status message ─────────────────────────────────────────── */
+
+.apeiron-status {
+	margin:      0.75rem 0 0;
+	font-size:   0.85rem;
+	color:       var(--apeiron-muted);
+	font-family: Georgia, serif;
+	font-style:  italic;
+	min-height:  1.2em;
+}
+
+.apeiron-status.apeiron-error {
+	color: var(--apeiron-error);
+}
+
+/* ── Footer paywall ─────────────────────────────────────────── */
+
+.apeiron-footer {
+	margin-top:  1.5rem;
+	font-size:   0.72rem;
+	color:       var(--apeiron-muted);
+	line-height: 1.6;
+}
+
+.apeiron-footer a {
+	color:           var(--apeiron-muted);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.apeiron-footer a:hover {
+	color: var(--apeiron-text);
+}
+
+/* ── Admin meta box ─────────────────────────────────────────── */
+
+.apeiron-meta-box {
+	padding: 4px 0;
+}
+
+.apeiron-meta-box label {
+	font-weight: normal;
+}
+
+.apeiron-registered {
+	color:       #27ae60;
+	font-weight: 600;
+}
+
+.apeiron-not-registered {
+	color: #888;
+}
+
+.apeiron-fee-notice {
+	background:    #f8f4e8;
+	border-left:   4px solid #c8a96e;
+	padding:       12px 16px;
+	margin-bottom: 20px;
+	font-size:     13px;
+	line-height:   1.6;
+}
+
+.apeiron-fee-table {
+	width:           100%;
+	border-collapse: collapse;
+	margin-top:      10px;
+	font-size:       13px;
+}
+
+.apeiron-fee-table th {
+	text-align:    left;
+	padding:       6px 10px;
+	background:    #ede8d8;
+	border-bottom: 2px solid #c8a96e;
+	font-weight:   600;
+	color:         #5a4a2a;
+}
+
+.apeiron-fee-table td {
+	padding:       6px 10px;
+	border-bottom: 1px solid #e0d8c0;
+	color:         #3a3a3a;
+}
+
+.apeiron-fee-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.apeiron-fee-table tbody tr:hover {
+	background: #f0ead6;
+}
+
+/* ============================================================
+   Apeiron Admin Dashboard Analytics
+   ============================================================ */
+
+.apeiron-dashboard-wrap {
+	background:  #0d0d0d;
+	min-height:  100vh;
+	padding:     32px 28px;
+	font-family: Georgia, serif;
+	color:       #e8e8e8;
+	margin-left: -20px;
+	margin-top:  -10px;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+
+.apeiron-dash-header {
+	display:         flex;
+	justify-content: space-between;
+	align-items:     flex-start;
+	margin-bottom:   32px;
+	flex-wrap:       wrap;
+	gap:             16px;
+}
+
+.apeiron-dash-title {
+	font-size:   2rem;
+	font-weight: bold;
+	color:       #ffffff;
+	margin:      0 0 6px;
+	font-family: Georgia, serif;
+}
+
+.apeiron-dash-subtitle {
+	color:     #888;
+	font-size: 0.9rem;
+	margin:    0;
+}
+
+.apeiron-dash-actions {
+	display: flex;
+	gap:     12px;
+	align-items: center;
+}
+
+/* ── Bottoni header ─────────────────────────────────────────── */
+
+.apeiron-dash-btn {
+	padding:       8px 16px;
+	border-radius: 6px;
+	font-family:   Georgia, serif;
+	font-size:     0.85rem;
+	cursor:        pointer;
+	text-decoration: none;
+	transition:    all 0.2s;
+	display:       inline-flex;
+	align-items:   center;
+	gap:           6px;
+}
+
+.apeiron-dash-btn-connect {
+	background:   transparent;
+	border:       1px solid #3a3a3a;
+	color:        #e8e8e8;
+}
+
+.apeiron-dash-btn-connect:hover {
+	border-color: #c8a96e;
+	color:        #c8a96e;
+}
+
+.apeiron-dash-btn-connected {
+	border-color: #4ecb71 !important;
+	color:        #4ecb71 !important;
+}
+
+.apeiron-dash-btn-new {
+	background:   transparent;
+	border:       1px solid #3a3a3a;
+	color:        #e8e8e8;
+}
+
+.apeiron-dash-btn-new:hover {
+	border-color: #c8a96e;
+	color:        #c8a96e;
+}
+
+/* ── Errore wallet ──────────────────────────────────────────── */
+
+.apeiron-dash-wallet-error {
+	background:    rgba( 231, 76, 60, 0.12 );
+	border:        1px solid #e74c3c;
+	border-radius: 6px;
+	color:         #e74c3c;
+	padding:       12px 16px;
+	margin-bottom: 24px;
+	font-size:     0.85rem;
+	white-space:   pre-line;
+	line-height:   1.6;
+}
+
+/* ── KPI cards ──────────────────────────────────────────────── */
+
+.apeiron-dash-kpis {
+	display:               grid;
+	grid-template-columns: repeat( 4, 1fr );
+	gap:                   16px;
+	margin-bottom:         32px;
+}
+
+.apeiron-dash-kpi {
+	background:    #141414;
+	border:        1px solid #2a2a2a;
+	border-radius: 8px;
+	padding:       24px 20px;
+	display:       flex;
+	flex-direction: column;
+	gap:           10px;
+}
+
+.apeiron-dash-kpi-value {
+	font-size:   2rem;
+	font-weight: bold;
+	font-family: Georgia, serif;
+	color:       #e8e8e8;
+	line-height: 1;
+}
+
+.apeiron-dash-kpi-revenue {
+	color: #c8a96e;
+}
+
+.apeiron-dash-kpi-ai-val {
+	color: #4ecb71;
+}
+
+.apeiron-dash-kpi-muted {
+	color: #888;
+}
+
+.apeiron-dash-kpi-label {
+	font-size:     0.65rem;
+	letter-spacing: 0.12em;
+	color:         #555;
+	text-transform: uppercase;
+	font-family:   Arial, sans-serif;
+}
+
+/* ── Loading ────────────────────────────────────────────────── */
+
+.apeiron-dash-loading {
+	display:      flex;
+	align-items:  center;
+	gap:          10px;
+	color:        #888;
+	font-size:    0.85rem;
+	font-style:   italic;
+	margin-bottom: 16px;
+}
+
+.apeiron-dash-spinner {
+	width:         16px;
+	height:        16px;
+	border:        2px solid #333;
+	border-top:    2px solid #c8a96e;
+	border-radius: 50%;
+	animation:     apeiron-spin 0.8s linear infinite;
+	display:       inline-block;
+}
+
+@keyframes apeiron-spin {
+	to { transform: rotate(360deg); }
+}
+
+/* ── Tabella ────────────────────────────────────────────────── */
+
+.apeiron-dash-table-wrap {
+	background:    #141414;
+	border:        1px solid #2a2a2a;
+	border-radius: 8px;
+	overflow:      hidden;
+}
+
+.apeiron-dash-table {
+	width:           100%;
+	border-collapse: collapse;
+	font-family:     Georgia, serif;
+}
+
+.apeiron-dash-table thead tr {
+	border-bottom: 1px solid #2a2a2a;
+}
+
+.apeiron-dash-table th {
+	padding:        12px 20px;
+	font-size:      0.65rem;
+	letter-spacing: 0.1em;
+	color:          #555;
+	text-transform: uppercase;
+	font-family:    Arial, sans-serif;
+	font-weight:    normal;
+	text-align:     left;
+}
+
+.apeiron-dash-table td {
+	padding:     16px 20px;
+	font-size:   0.9rem;
+	color:       #e8e8e8;
+	border-bottom: 1px solid #1e1e1e;
+}
+
+.apeiron-dash-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.apeiron-dash-table tbody tr:hover td {
+	background: #1a1a1a;
+}
+
+.apeiron-dash-article-title {
+	color:       #c8a96e;
+	font-style:  italic;
+	max-width:   400px;
+}
+
+.apeiron-dash-revenue {
+	color: #c8a96e;
+}
+
+.apeiron-dash-bots {
+	color: #4ecb71;
+}
+
+.apeiron-dash-view-link {
+	color:           #c8a96e;
+	text-decoration: none;
+	font-size:       0.85rem;
+}
+
+.apeiron-dash-view-link:hover {
+	text-decoration: underline;
+}
+
+.apeiron-dash-empty {
+	text-align: center;
+	color:      #555;
+	font-style: italic;
+	padding:    40px 20px !important;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+
+@media ( max-width: 900px ) {
+	.apeiron-dash-kpis {
+		grid-template-columns: repeat( 2, 1fr );
+	}
+}
+
+@media ( max-width: 600px ) {
+	.apeiron-dash-kpis {
+		grid-template-columns: 1fr;
+	}
+	.apeiron-dash-header {
+		flex-direction: column;
+	}
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+
+@media ( max-width: 600px ) {
+	.apeiron-card {
+		padding:       2rem 1.25rem;
+		margin:        0 -8px;
+		border-radius: 0;
+		border-left:   none;
+		border-right:  none;
+	}
+
+	.apeiron-steps {
+		gap: 1rem;
+	}
+}
