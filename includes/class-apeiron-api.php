@@ -2,18 +2,28 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST endpoint: /wp-json/apeiron/v1/verify
+ * REST endpoints Apeiron:
  *
- * Verifica on-chain (via RPC JSON) se un wallet ha accesso a un contenuto.
- * Chiama: gateway.hasAccess(walletAddress, contentId, accessType=0)
+ * GET /wp-json/apeiron/v1/verify
+ *   Verifica on-chain se un wallet ha accesso (usato dal frontend JS).
+ *
+ * GET /wp-json/apeiron/v1/content/<post_id>
+ *   Endpoint x402 machine-readable per agenti AI:
+ *   - Senza header x-wallet-address → HTTP 402 con istruzioni pagamento
+ *   - Con header x-wallet-address   → verifica on-chain → HTTP 200 con contenuto
  */
 class Apeiron_Api {
+
+	// Bot User-Agent regex — identico al SDK Apeiron Node.js
+	const KNOWN_BOTS = '/GPTBot|ClaudeBot|Google-Extended|anthropic|openai|bot|crawler|spider|X402-Agent/i';
 
 	public function init(): void {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
 
 	public function register_routes(): void {
+
+		// ── Endpoint verifica (usato dal JS frontend) ────────────────────────
 		register_rest_route( 'apeiron/v1', '/verify', [
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => [ $this, 'verify_access' ],
@@ -31,16 +41,27 @@ class Apeiron_Api {
 				],
 			],
 		] );
+
+		// ── Endpoint x402 per agenti AI ──────────────────────────────────────
+		register_rest_route( 'apeiron/v1', '/content/(?P<post_id>\d+)', [
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => [ $this, 'x402_content' ],
+			'permission_callback' => '__return_true',
+			'args'                => [
+				'post_id' => [
+					'required'          => true,
+					'validate_callback' => static fn( $v ) => is_numeric( $v ) && $v > 0,
+				],
+			],
+		] );
 	}
 
-	/**
-	 * Gestisce la richiesta di verifica.
-	 */
+	// ── /verify ─────────────────────────────────────────────────────────────
+
 	public function verify_access( WP_REST_Request $request ): WP_REST_Response {
 		$wallet     = $request->get_param( 'wallet_address' );
 		$content_id = $request->get_param( 'content_id' );
-
-		$has_access = $this->call_has_access( $wallet, $content_id );
+		$has_access = $this->call_has_access( $wallet, $content_id, 0 );
 
 		if ( is_wp_error( $has_access ) ) {
 			return new WP_REST_Response(
@@ -52,37 +73,130 @@ class Apeiron_Api {
 		return new WP_REST_Response( [ 'hasAccess' => $has_access ], 200 );
 	}
 
+	// ── /content/<post_id> — x402 ────────────────────────────────────────────
+
+	public function x402_content( WP_REST_Request $request ): WP_REST_Response {
+		$post_id = (int) $request->get_param( 'post_id' );
+		$post    = get_post( $post_id );
+
+		// Post non trovato o non pubblicato
+		if ( ! $post || 'publish' !== $post->post_status ) {
+			return new WP_REST_Response( [ 'error' => 'Post not found' ], 404 );
+		}
+
+		// Post non protetto → accesso libero
+		$protected = get_post_meta( $post_id, '_apeiron_protected', true );
+		if ( '1' !== $protected ) {
+			return $this->response_content( $post );
+		}
+
+		// Dati on-chain
+		$content_id  = get_post_meta( $post_id, '_apeiron_content_id', true );
+		$human_price = get_post_meta( $post_id, '_apeiron_human_price', true ) ?: '0.10';
+		$ai_price    = get_post_meta( $post_id, '_apeiron_ai_price', true )    ?: '1.00';
+
+		if ( ! $content_id ) {
+			return new WP_REST_Response(
+				[ 'error' => 'Content not registered on-chain yet' ],
+				503
+			);
+		}
+
+		// Rilevamento bot via User-Agent
+		$user_agent  = $request->get_header( 'user_agent' ) ?? '';
+		$is_bot      = (bool) preg_match( self::KNOWN_BOTS, $user_agent );
+		$access_type = $is_bot ? 1 : 0; // 1=AI, 0=human
+		$price_usdc  = $is_bot ? $ai_price : $human_price;
+		$price_wei   = $this->usdc_to_wei( $price_usdc );
+
+		$gateway_address = get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY );
+		$usdc_address    = get_option( 'apeiron_usdc_address',    APEIRON_DEFAULT_USDC );
+
+		// ── Nessun wallet → HTTP 402 ─────────────────────────────────────────
+		$wallet = $request->get_header( 'x_wallet_address' );
+		if ( ! $wallet || ! preg_match( '/^0x[0-9a-fA-F]{40}$/', $wallet ) ) {
+			return new WP_REST_Response( [
+				'error'          => 'Payment Required',
+				'protocol'       => 'x402',
+				'version'        => '1.0',
+				'gatewayAddress' => $gateway_address,
+				'usdcAddress'    => $usdc_address,
+				'contentId'      => $content_id,
+				'accessType'     => $is_bot ? 'AI_LICENSE' : 'HUMAN_READ',
+				'price'          => $price_wei,
+				'priceFormatted' => number_format( (float) $price_usdc, 6 ) . ' USDC',
+				'instructions'   => [
+					'step1' => sprintf( 'USDC.approve("%s", %s)', $gateway_address, $price_wei ),
+					'step2' => $is_bot
+						? sprintf( 'gateway.unlockAsAgent("%s", 2592000)', $content_id )
+						: sprintf( 'gateway.unlockAsHuman("%s", 0)', $content_id ),
+				],
+				'network'        => [ 'name' => 'Base', 'chainId' => APEIRON_CHAIN_ID ],
+				'postId'         => $post_id,
+				'postUrl'        => get_permalink( $post_id ),
+			], 402 );
+		}
+
+		// ── Wallet presente → verifica on-chain ──────────────────────────────
+		$has_access = $this->call_has_access( $wallet, $content_id, $access_type );
+
+		if ( is_wp_error( $has_access ) ) {
+			return new WP_REST_Response(
+				[ 'error' => 'RPC error', 'detail' => $has_access->get_error_message() ],
+				502
+			);
+		}
+
+		if ( ! $has_access ) {
+			return new WP_REST_Response( [
+				'error'     => 'Payment Required',
+				'reason'    => 'No valid access found on-chain for this wallet',
+				'wallet'    => $wallet,
+				'contentId' => $content_id,
+			], 402 );
+		}
+
+		// ── Accesso verificato → HTTP 200 ────────────────────────────────────
+		return $this->response_content( $post, $wallet, $access_type );
+	}
+
+	// ── Helpers ──────────────────────────────────────────────────────────────
+
+	private function response_content( WP_Post $post, string $wallet = '', int $access_type = 0 ): WP_REST_Response {
+		return new WP_REST_Response( [
+			'postId'     => $post->ID,
+			'title'      => $post->post_title,
+			'body'       => wp_strip_all_tags( apply_filters( 'the_content', $post->post_content ) ),
+			'url'        => get_permalink( $post->ID ),
+			'author'     => get_the_author_meta( 'display_name', $post->post_author ),
+			'date'       => $post->post_date,
+			'accessedBy' => $wallet ?: 'public',
+			'accessType' => $access_type === 1 ? 'AI_LICENSE' : 'HUMAN_READ',
+		], 200 );
+	}
+
 	/**
-	 * Chiama gateway.hasAccess(wallet, contentId, 0) via eth_call JSON-RPC.
-	 *
-	 * Signature: hasAccess(address,bytes32,uint8) → bool
-	 * Selector:  keccak256("hasAccess(address,bytes32,uint8)")[0:4]
+	 * Chiama gateway.hasAccess(wallet, contentId, accessType) via eth_call.
+	 * Selector hasAccess(address,bytes32,uint8) = 4a0f4a07
 	 */
-	private function call_has_access( string $wallet, string $content_id ): bool|WP_Error {
+	private function call_has_access( string $wallet, string $content_id, int $access_type = 0 ): bool|WP_Error {
 		$rpc_url  = get_option( 'apeiron_rpc_url',         APEIRON_DEFAULT_RPC );
 		$gateway  = get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY );
 
-		// Rimuovi 0x se presente da content_id (deve essere 32 byte = 64 hex chars)
 		$content_id_hex = ltrim( $content_id, '0x' );
 		if ( strlen( $content_id_hex ) !== 64 ) {
-			return new WP_Error( 'invalid_content_id', 'content_id deve essere bytes32' );
+			return new WP_Error( 'invalid_content_id', 'content_id must be bytes32' );
 		}
 
-		// ABI encode: hasAccess(address wallet, bytes32 contentId, uint8 accessType)
-		// Selector: 0x... (calcolato staticamente)
-		// hasAccess(address,bytes32,uint8) → 4a0f4a07
-		$selector   = '4a0f4a07';
+		$selector   = '24ea5704';
 		$wallet_pad = str_pad( ltrim( strtolower( $wallet ), '0x' ), 64, '0', STR_PAD_LEFT );
-		$type_pad   = str_pad( '0', 64, '0', STR_PAD_LEFT ); // accessType = 0 (human)
+		$type_pad   = str_pad( dechex( $access_type ), 64, '0', STR_PAD_LEFT );
 		$data       = '0x' . $selector . $wallet_pad . $content_id_hex . $type_pad;
 
 		$payload = wp_json_encode( [
 			'jsonrpc' => '2.0',
 			'method'  => 'eth_call',
-			'params'  => [
-				[ 'to' => $gateway, 'data' => $data ],
-				'latest',
-			],
+			'params'  => [ [ 'to' => $gateway, 'data' => $data ], 'latest' ],
 			'id'      => 1,
 		] );
 
@@ -100,16 +214,16 @@ class Apeiron_Api {
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( ! isset( $body['result'] ) ) {
-			$msg = $body['error']['message'] ?? 'Risposta RPC non valida';
-			return new WP_Error( 'rpc_error', $msg );
+			return new WP_Error( 'rpc_error', $body['error']['message'] ?? 'Invalid RPC response' );
 		}
 
-		// Il risultato è un uint256 ABI-encoded (32 byte): 0x000...0001 = true, 0x000...0000 = false
 		$result_hex = ltrim( $body['result'], '0x' );
 		return ( ltrim( $result_hex, '0' ) === '1' );
 	}
 
-	// ── Validators ──────────────────────────────────────────────────────────
+	private function usdc_to_wei( string $amount ): string {
+		return (string) (int) ( (float) $amount * 1_000_000 );
+	}
 
 	public function validate_address( string $value ): bool {
 		return (bool) preg_match( '/^0x[0-9a-fA-F]{40}$/', $value );
