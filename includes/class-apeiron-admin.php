@@ -7,10 +7,21 @@ defined( 'ABSPATH' ) || exit;
 class Apeiron_Admin {
 
 	public function init(): void {
+		add_action( 'admin_menu',            [ $this, 'register_menu' ] );
 		add_action( 'admin_init',            [ $this, 'register_settings' ] );
 		add_action( 'add_meta_boxes',        [ $this, 'add_meta_box' ] );
 		add_action( 'save_post',             [ $this, 'save_meta' ], 10, 2 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+	}
+
+	public function register_menu(): void {
+		add_options_page(
+			__( 'Apeiron Settings', 'apeiron' ),
+			__( 'Apeiron', 'apeiron' ),
+			'manage_options',
+			'apeiron-settings',
+			[ $this, 'render_settings_page' ]
+		);
 	}
 
 	// ── Settings globali ────────────────────────────────────────────────────
