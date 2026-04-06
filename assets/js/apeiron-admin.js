@@ -106,7 +106,13 @@
 			);
 
 			statusEl.text( 'Tx inviata: ' + tx.hash.substring( 0, 16 ) + '… (in attesa)' ).css( 'color', '#c8a96e' );
-			await tx.wait();
+
+			// tx.wait() può fallire con nonce:undefined su alcuni RPC — polling manuale
+			let receipt = null;
+			while ( ! receipt ) {
+				await new Promise( r => setTimeout( r, 3000 ) );
+				receipt = await provider.getTransactionReceipt( tx.hash );
+			}
 
 			// 5. Aggiorna stato su WordPress
 			const markRes = await $.post( ajaxUrl, {

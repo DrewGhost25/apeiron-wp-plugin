@@ -197,7 +197,11 @@ class Apeiron_Admin {
 					       style="width:100%" />
 				</p>
 
-				<div id="apeiron-human-price-field" <?php echo $mode === 'ai_only' ? 'style="display:none"' : ''; ?>>
+				<div id="apeiron-human-price-field">
+					<div id="apeiron-ai-only-notice" style="<?php echo $mode !== 'ai_only' ? 'display:none;' : ''; ?>background:#1a2a3a;border-left:3px solid #c8a96e;padding:8px 10px;margin-bottom:8px;border-radius:3px;font-size:12px;color:#c8a96e;line-height:1.4">
+						ℹ️ <strong><?php esc_html_e( 'Richiesto dallo smart contract', 'apeiron' ); ?></strong><br>
+						<?php esc_html_e( 'Il contratto X402GatewayV3 richiede entrambi i prezzi alla registrazione. I lettori umani accederanno gratis — solo i bot pagheranno.', 'apeiron' ); ?>
+					</div>
 					<p>
 						<label for="apeiron_human_price">
 							<?php esc_html_e( 'Prezzo lettori umani (USDC)', 'apeiron' ); ?>
@@ -209,18 +213,20 @@ class Apeiron_Admin {
 						       step="0.01" min="0.01"
 						       style="width:100%" />
 					</p>
-					<p>
-						<label for="apeiron_preview_paras">
-							<?php esc_html_e( 'Paragrafi in anteprima', 'apeiron' ); ?>
-						</label><br>
-						<input type="number"
-						       id="apeiron_preview_paras"
-						       name="apeiron_preview_paras"
-						       value="<?php echo esc_attr( $preview_paras ); ?>"
-						       step="1" min="1" max="20"
-						       style="width:100%" />
-						<small style="color:#888"><?php esc_html_e( 'Solo in modalità Full (default: 4)', 'apeiron' ); ?></small>
-					</p>
+					<div id="apeiron-preview-field" <?php echo $mode === 'ai_only' ? 'style="display:none"' : ''; ?>>
+						<p>
+							<label for="apeiron_preview_paras">
+								<?php esc_html_e( 'Paragrafi in anteprima', 'apeiron' ); ?>
+							</label><br>
+							<input type="number"
+							       id="apeiron_preview_paras"
+							       name="apeiron_preview_paras"
+							       value="<?php echo esc_attr( $preview_paras ); ?>"
+							       step="1" min="1" max="20"
+							       style="width:100%" />
+							<small style="color:#888"><?php esc_html_e( 'Solo in modalità Full (default: 4)', 'apeiron' ); ?></small>
+						</p>
+					</div>
 				</div>
 
 				<hr>
@@ -253,13 +259,17 @@ class Apeiron_Admin {
 
 		<script>
 		( function() {
-			const sel    = document.getElementById( 'apeiron_mode' );
-			const fields = document.getElementById( 'apeiron-price-fields' );
-			const human  = document.getElementById( 'apeiron-human-price-field' );
+			const sel     = document.getElementById( 'apeiron_mode' );
+			const fields  = document.getElementById( 'apeiron-price-fields' );
+			const notice  = document.getElementById( 'apeiron-ai-only-notice' );
+			const preview = document.getElementById( 'apeiron-preview-field' );
 
 			sel.addEventListener( 'change', function() {
-				fields.style.display = this.value === 'disabled' ? 'none' : '';
-				human.style.display  = this.value === 'ai_only'  ? 'none' : '';
+				const isDisabled = this.value === 'disabled';
+				const isAiOnly   = this.value === 'ai_only';
+				fields.style.display  = isDisabled ? 'none' : '';
+				notice.style.display  = isAiOnly   ? ''     : 'none';
+				preview.style.display = isAiOnly   ? 'none' : '';
 			} );
 		} )();
 		</script>
