@@ -95,6 +95,35 @@ class Apeiron_Admin {
 				</table>
 			</div>
 
+			<div class="apeiron-fee-notice" style="margin-top:20px">
+				<strong><?php esc_html_e( 'Interceptable AI Bots', 'apeiron' ); ?></strong>
+				<p style="margin:4px 0 8px;color:#888;font-size:13px"><?php esc_html_e( 'These User-Agent patterns are automatically detected and subject to the x402 paywall in AI Only and Full modes.', 'apeiron' ); ?></p>
+				<table class="apeiron-fee-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Bot / User-Agent', 'apeiron' ); ?></th>
+							<th><?php esc_html_e( 'Company', 'apeiron' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr><td>GPTBot</td><td>OpenAI</td></tr>
+						<tr><td>ChatGPT-User</td><td>OpenAI</td></tr>
+						<tr><td>ClaudeBot</td><td>Anthropic</td></tr>
+						<tr><td>Claude-Web</td><td>Anthropic</td></tr>
+						<tr><td>Google-Extended</td><td>Google</td></tr>
+						<tr><td>Googlebot</td><td>Google</td></tr>
+						<tr><td>PerplexityBot</td><td>Perplexity AI</td></tr>
+						<tr><td>YouBot</td><td>You.com</td></tr>
+						<tr><td>Diffbot</td><td>Diffbot</td></tr>
+						<tr><td>CCBot</td><td>Common Crawl</td></tr>
+						<tr><td>FacebookBot</td><td>Meta</td></tr>
+						<tr><td>Applebot</td><td>Apple</td></tr>
+						<tr><td>BingBot</td><td>Microsoft</td></tr>
+						<tr><td>X402-Agent</td><td>x402 Protocol</td></tr>
+					</tbody>
+				</table>
+			</div>
+
 			<form method="post" action="options.php">
 				<?php
 				settings_fields( 'apeiron_settings' );
@@ -122,76 +151,91 @@ class Apeiron_Admin {
 	public function render_meta_box( WP_Post $post ): void {
 		wp_nonce_field( 'apeiron_save_meta', 'apeiron_nonce' );
 
-		$protected       = get_post_meta( $post->ID, '_apeiron_protected', true );
-		$human_price     = get_post_meta( $post->ID, '_apeiron_human_price', true )    ?: '0.10';
-		$ai_price        = get_post_meta( $post->ID, '_apeiron_ai_price', true )       ?: '1.00';
-		$preview_paras   = get_post_meta( $post->ID, '_apeiron_preview_paras', true )  ?: '4';
-		$registered      = get_post_meta( $post->ID, '_apeiron_registered', true );
-		$content_id      = get_post_meta( $post->ID, '_apeiron_content_id', true );
+		// Retrocompatibilità: vecchio checkbox → full
+		$mode = get_post_meta( $post->ID, '_apeiron_mode', true );
+		if ( ! $mode ) {
+			$old_protected = get_post_meta( $post->ID, '_apeiron_protected', true );
+			$mode = $old_protected === '1' ? 'full' : 'disabled';
+		}
+
+		$human_price   = get_post_meta( $post->ID, '_apeiron_human_price', true )   ?: '0.10';
+		$ai_price      = get_post_meta( $post->ID, '_apeiron_ai_price', true )      ?: '1.00';
+		$preview_paras = get_post_meta( $post->ID, '_apeiron_preview_paras', true ) ?: '4';
+		$registered    = get_post_meta( $post->ID, '_apeiron_registered', true );
+		$content_id    = get_post_meta( $post->ID, '_apeiron_content_id', true );
+
+		$modes = [
+			'disabled' => __( '🔓 Disabled — nessuna protezione', 'apeiron' ),
+			'ai_only'  => __( '🤖 AI Only — umani gratis, bot pagano', 'apeiron' ),
+			'full'     => __( '🔒 Full — paywall per tutti', 'apeiron' ),
+		];
 		?>
 		<div class="apeiron-meta-box">
 
 			<p>
-				<label>
-					<input type="checkbox"
-					       name="apeiron_protected"
-					       value="1"
-					       <?php checked( $protected, '1' ); ?> />
-					<?php esc_html_e( 'Proteggi con Apeiron', 'apeiron' ); ?>
-				</label>
+				<label for="apeiron_mode"><strong><?php esc_html_e( 'Modalità protezione', 'apeiron' ); ?></strong></label><br>
+				<select id="apeiron_mode" name="apeiron_mode" style="width:100%;margin-top:4px">
+					<?php foreach ( $modes as $val => $label ) : ?>
+						<option value="<?php echo esc_attr( $val ); ?>" <?php selected( $mode, $val ); ?>>
+							<?php echo esc_html( $label ); ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
 			</p>
 
-			<p>
-				<label for="apeiron_human_price">
-					<?php esc_html_e( 'Prezzo lettori umani (USDC)', 'apeiron' ); ?>
-				</label><br>
-				<input type="number"
-				       id="apeiron_human_price"
-				       name="apeiron_human_price"
-				       value="<?php echo esc_attr( $human_price ); ?>"
-				       step="0.01" min="0.01"
-				       style="width:100%" />
-			</p>
+			<div id="apeiron-price-fields" <?php echo $mode === 'disabled' ? 'style="display:none"' : ''; ?>>
 
-			<p>
-				<label for="apeiron_ai_price">
-					<?php esc_html_e( 'Prezzo agenti AI (USDC)', 'apeiron' ); ?>
-				</label><br>
-				<input type="number"
-				       id="apeiron_ai_price"
-				       name="apeiron_ai_price"
-				       value="<?php echo esc_attr( $ai_price ); ?>"
-				       step="0.01" min="0.01"
-				       style="width:100%" />
-			</p>
+				<p>
+					<label for="apeiron_ai_price">
+						<?php esc_html_e( 'Prezzo agenti AI (USDC)', 'apeiron' ); ?>
+					</label><br>
+					<input type="number"
+					       id="apeiron_ai_price"
+					       name="apeiron_ai_price"
+					       value="<?php echo esc_attr( $ai_price ); ?>"
+					       step="0.01" min="0.01"
+					       style="width:100%" />
+				</p>
 
-			<p>
-				<label for="apeiron_preview_paras">
-					<?php esc_html_e( 'Paragrafi in anteprima', 'apeiron' ); ?>
-				</label><br>
-				<input type="number"
-				       id="apeiron_preview_paras"
-				       name="apeiron_preview_paras"
-				       value="<?php echo esc_attr( $preview_paras ); ?>"
-				       step="1" min="1" max="20"
-				       style="width:100%" />
-				<small style="color:#888"><?php esc_html_e( 'Quanti paragrafi mostrare prima del paywall (default: 4)', 'apeiron' ); ?></small>
-			</p>
+				<div id="apeiron-human-price-field" <?php echo $mode === 'ai_only' ? 'style="display:none"' : ''; ?>>
+					<p>
+						<label for="apeiron_human_price">
+							<?php esc_html_e( 'Prezzo lettori umani (USDC)', 'apeiron' ); ?>
+						</label><br>
+						<input type="number"
+						       id="apeiron_human_price"
+						       name="apeiron_human_price"
+						       value="<?php echo esc_attr( $human_price ); ?>"
+						       step="0.01" min="0.01"
+						       style="width:100%" />
+					</p>
+					<p>
+						<label for="apeiron_preview_paras">
+							<?php esc_html_e( 'Paragrafi in anteprima', 'apeiron' ); ?>
+						</label><br>
+						<input type="number"
+						       id="apeiron_preview_paras"
+						       name="apeiron_preview_paras"
+						       value="<?php echo esc_attr( $preview_paras ); ?>"
+						       step="1" min="1" max="20"
+						       style="width:100%" />
+						<small style="color:#888"><?php esc_html_e( 'Solo in modalità Full (default: 4)', 'apeiron' ); ?></small>
+					</p>
+				</div>
 
-			<hr>
+				<hr>
 
-			<p class="apeiron-status">
-				<?php if ( $registered ) : ?>
-					<span class="apeiron-registered">&#10003; <?php esc_html_e( 'Registrato on-chain', 'apeiron' ); ?></span>
-					<?php if ( $content_id ) : ?>
-						<br><small>ID: <code><?php echo esc_html( substr( $content_id, 0, 12 ) . '…' ); ?></code></small>
+				<p class="apeiron-status">
+					<?php if ( $registered ) : ?>
+						<span class="apeiron-registered">&#10003; <?php esc_html_e( 'Registrato on-chain', 'apeiron' ); ?></span>
+						<?php if ( $content_id ) : ?>
+							<br><small>ID: <code><?php echo esc_html( substr( $content_id, 0, 12 ) . '…' ); ?></code></small>
+						<?php endif; ?>
+					<?php else : ?>
+						<span class="apeiron-not-registered">&#9679; <?php esc_html_e( 'Non ancora registrato', 'apeiron' ); ?></span>
 					<?php endif; ?>
-				<?php else : ?>
-					<span class="apeiron-not-registered">&#9679; <?php esc_html_e( 'Non ancora registrato', 'apeiron' ); ?></span>
-				<?php endif; ?>
-			</p>
+				</p>
 
-			<?php if ( $protected ) : ?>
 				<button type="button"
 				        id="apeiron-register-btn"
 				        class="button button-secondary"
@@ -202,9 +246,23 @@ class Apeiron_Admin {
 					<?php esc_html_e( 'Registra su blockchain', 'apeiron' ); ?>
 				</button>
 				<span id="apeiron-register-status" style="margin-left:8px;"></span>
-			<?php endif; ?>
+
+			</div><!-- /#apeiron-price-fields -->
 
 		</div>
+
+		<script>
+		( function() {
+			const sel    = document.getElementById( 'apeiron_mode' );
+			const fields = document.getElementById( 'apeiron-price-fields' );
+			const human  = document.getElementById( 'apeiron-human-price-field' );
+
+			sel.addEventListener( 'change', function() {
+				fields.style.display = this.value === 'disabled' ? 'none' : '';
+				human.style.display  = this.value === 'ai_only'  ? 'none' : '';
+			} );
+		} )();
+		</script>
 		<?php
 	}
 
@@ -219,7 +277,17 @@ class Apeiron_Admin {
 			return;
 		}
 
-		$protected   = isset( $_POST['apeiron_protected'] ) ? '1' : '0';
+		$allowed_modes = [ 'disabled', 'ai_only', 'full' ];
+		$mode          = isset( $_POST['apeiron_mode'] )
+			? sanitize_text_field( wp_unslash( $_POST['apeiron_mode'] ) )
+			: 'disabled';
+		if ( ! in_array( $mode, $allowed_modes, true ) ) {
+			$mode = 'disabled';
+		}
+
+		// Retrocompatibilità campo _apeiron_protected
+		$protected = ( $mode === 'full' ) ? '1' : '0';
+
 		$human_price = isset( $_POST['apeiron_human_price'] )
 			? (string) round( (float) sanitize_text_field( wp_unslash( $_POST['apeiron_human_price'] ) ), 6 )
 			: '0.10';
@@ -231,13 +299,13 @@ class Apeiron_Admin {
 			? max( 1, min( 20, absint( $_POST['apeiron_preview_paras'] ) ) )
 			: 4;
 
-		update_post_meta( $post_id, '_apeiron_protected',     $protected );
+		update_post_meta( $post_id, '_apeiron_mode',          $mode );
+		update_post_meta( $post_id, '_apeiron_protected',     $protected ); // retrocompatibilità
 		update_post_meta( $post_id, '_apeiron_human_price',   $human_price );
 		update_post_meta( $post_id, '_apeiron_ai_price',      $ai_price );
 		update_post_meta( $post_id, '_apeiron_preview_paras', $preview_paras );
 
-		// Se l'articolo viene deprotetto, resetta la registrazione
-		if ( '0' === $protected ) {
+		if ( $mode === 'disabled' ) {
 			update_post_meta( $post_id, '_apeiron_registered', '0' );
 		}
 	}

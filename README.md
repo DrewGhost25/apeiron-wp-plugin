@@ -23,14 +23,37 @@ AI agents (LLM scrapers, RAG pipelines, automated readers) are detected and pric
 
 ## Features
 
-- 🔒 **Per-article paywall** — protect any post with a single checkbox
+- 🔒 **Three protection modes** per article — Full, AI Only, Disabled
 - 💵 **USDC payments** — stablecoin, 1:1 with USD, on Base (near-zero gas fees)
 - 🤖 **Dual pricing** — separate price for human readers and AI agents
 - ✅ **On-chain access verification** — no database, no sessions
 - 👁 **Configurable preview** — show N paragraphs before the paywall (default: 4)
-- 📊 **Analytics dashboard** — see revenue, human readers and AI bots per article
+- 📊 **Analytics dashboard** — revenue, human readers and AI bots per article
 - 🏷 **Publisher bypass** — the article owner sees full content for free
+- 🌐 **x402 protocol** — machine-readable payment endpoint for AI agents
 - ⚡ **No backend dependency** — works with any public Base RPC
+
+---
+
+## Protection Modes
+
+Each article can be set to one of three modes from the **Apeiron Paywall** meta box:
+
+| Mode | Human readers | AI bots | Use case |
+|---|---|---|---|
+| 🔓 **Disabled** | Free | Free | Public content |
+| 🤖 **AI Only** | Free | HTTP 402 + payment instructions | Monetize AI scraping only |
+| 🔒 **Full** | Paywall (USDC) | HTTP 402 + payment instructions | Premium content |
+
+### AI Only mode — how it works
+
+In `ai_only` mode, human readers access the article for free as normal.
+When a known bot (`GPTBot`, `ClaudeBot`, `X402-Agent`, etc.) hits the page:
+
+1. WordPress intercepts the request via `User-Agent` detection
+2. Returns **HTTP 402** with x402 payment instructions (JSON)
+3. The bot approves USDC + calls `unlockAsAgent()` on-chain
+4. Retries the request with `x-wallet-address` header → gets the content
 
 ---
 
@@ -93,16 +116,18 @@ Go to **Settings → Apeiron** and fill in:
 | USDC Token Address | Pre-filled: `0x833589fC...` |
 | Base RPC URL | Pre-filled: `https://mainnet.base.org` |
 
-### 2. Protect an article
+### 2. Set protection mode on an article
 
 1. Open any WordPress post in the editor
 2. Find the **Apeiron Paywall** meta box in the sidebar
-3. Check **"Proteggi con Apeiron"**
-4. Set **Human price** (default: $0.10 USDC)
-5. Set **AI agent price** (default: $1.00 USDC)
-6. Set **Preview paragraphs** (how many paragraphs to show before the paywall, default: 4)
-7. **Publish the article first**, then click **"Registra su blockchain"**
-8. MetaMask will open — confirm the `registerContent` transaction
+3. Select a **protection mode** from the dropdown:
+   - 🔓 Disabled
+   - 🤖 AI Only — humans read free, bots pay
+   - 🔒 Full — paywall for everyone
+4. Set **AI agent price** (default: $1.00 USDC)
+5. *(Full mode only)* Set **Human price** (default: $0.10 USDC) and **Preview paragraphs**
+6. **Publish the article first**, then click **"Registra su blockchain"**
+7. MetaMask will open — confirm the `registerContent` transaction
 
 > ⚠️ **Always publish the article before registering on-chain.** The `contentId` is derived from the public URL of the post.
 
@@ -121,7 +146,7 @@ Go to **Apeiron → Analytics** in the WordPress admin menu.
 
 ## How It Works
 
-### Reader flow
+### Full mode — human reader flow
 
 ```
 Article page
@@ -141,9 +166,33 @@ Article page
                     └─ Access permanent on-chain → Show full article ✓
 ```
 
-### AI agent flow
+### AI Only / Full mode — AI agent flow (x402 protocol)
 
-Agents call `unlockAsAgent(contentId, 0)` directly on the contract. The plugin exposes the `contentId` and contract address in the page's JS context (`window.apeironData`) so agents can read and pay programmatically.
+```
+Agent → GET article URL  (User-Agent: GPTBot / X402-Agent)
+       ← HTTP 402 + JSON {
+           protocol: "x402",
+           contentId, gatewayAddress, usdcAddress,
+           accessType: "AI_LICENSE",
+           price: "1000000",        ← 1.00 USDC in wei
+           instructions: {
+             step1: "USDC.approve(...)",
+             step2: "gateway.unlockAsAgent(...)"
+           }
+         }
+
+Agent approves USDC + calls unlockAsAgent() on Base Mainnet
+
+Agent → GET article URL
+       header: x-wallet-address: 0x...
+       ← HTTP 200 + { title, body, accessType: "AI_LICENSE" }
+```
+
+Alternatively, agents can use the dedicated REST endpoint directly:
+
+```
+GET /wp-json/apeiron/v1/content/<post_id>
+```
 
 ### Content ID
 
@@ -152,7 +201,7 @@ Each article is identified by:
 contentId = ethers.keccak256(ethers.toUtf8Bytes(articleUrl))
 ```
 
-This is computed in the browser (not PHP) to ensure Ethereum Keccak-256 compatibility.
+Computed in the browser to ensure Ethereum Keccak-256 compatibility.
 
 ---
 
@@ -161,19 +210,20 @@ This is computed in the browser (not PHP) to ensure Ethereum Keccak-256 compatib
 ```
 apeiron-wp-plugin/
 ├── apeiron.php                         # Main plugin file — constants, boot, hooks
+├── agent-wp.mjs                        # Example AI agent using x402 on WordPress
 ├── includes/
-│   ├── class-apeiron-admin.php         # Settings page + article meta box
-│   ├── class-apeiron-frontend.php      # Paywall injection on the_content
-│   ├── class-apeiron-api.php           # REST endpoint /wp-json/apeiron/v1/verify
+│   ├── class-apeiron-admin.php         # Settings page + article meta box (3 modes)
+│   ├── class-apeiron-frontend.php      # Paywall + bot interception (template_redirect)
+│   ├── class-apeiron-api.php           # REST: /verify + /content/<id> (x402)
 │   ├── class-apeiron-register.php      # AJAX: save contentId, mark registered
 │   └── class-apeiron-dashboard.php     # Analytics admin page
 ├── assets/
 │   ├── js/
 │   │   ├── apeiron-paywall.js          # Wallet connect + approve + pay flow
 │   │   ├── apeiron-admin.js            # "Register on blockchain" in editor
-│   │   └── apeiron-dashboard.js        # Analytics: getLogs + chart
+│   │   └── apeiron-dashboard.js        # Analytics: getLogs + aggregation
 │   └── css/
-│       └── apeiron-paywall.css         # Dark theme styles (paywall + dashboard)
+│       └── apeiron-paywall.css         # Dark theme (paywall + dashboard)
 ├── templates/
 │   └── paywall-template.php            # Paywall HTML card
 └── readme.txt                          # WordPress.org plugin readme
@@ -183,23 +233,60 @@ apeiron-wp-plugin/
 
 ## REST API
 
-The plugin exposes one REST endpoint for client-side access verification:
+### Verify access (used by JS frontend)
 
 ```
 GET /wp-json/apeiron/v1/verify
     ?wallet_address=0x...
     &content_id=0x...
 
-Response: { "hasAccess": true }
+→ 200 { "hasAccess": true }
 ```
 
-This calls `gateway.hasAccess(wallet, contentId, 0)` via PHP JSON-RPC and returns the result without requiring a wallet connection.
+### x402 content endpoint (for AI agents)
+
+```
+GET /wp-json/apeiron/v1/content/<post_id>
+
+→ 402  { protocol, contentId, price, accessType, instructions, ... }
+       (no x-wallet-address header, or unverified)
+
+→ 200  { title, body, accessType, accessedBy, ... }
+       (with valid x-wallet-address header, access verified on-chain)
+```
+
+Bot detection is automatic via `User-Agent`. See the full list below.
+
+---
+
+## Interceptable AI Bots
+
+The following User-Agent patterns are detected automatically. In **AI Only** and **Full** modes, matching requests receive HTTP 402 with x402 payment instructions.
+
+| Bot / User-Agent | Company |
+|---|---|
+| `GPTBot` | OpenAI |
+| `ChatGPT-User` | OpenAI |
+| `ClaudeBot` | Anthropic |
+| `Claude-Web` | Anthropic |
+| `Google-Extended` | Google |
+| `Googlebot` | Google |
+| `PerplexityBot` | Perplexity AI |
+| `YouBot` | You.com |
+| `Diffbot` | Diffbot |
+| `CCBot` | Common Crawl |
+| `FacebookBot` | Meta |
+| `Applebot` | Apple |
+| `BingBot` | Microsoft |
+| `X402-Agent` | x402 Protocol |
+
+Generic patterns (`bot`, `crawler`, `spider`, `anthropic`, `openai`) are also matched as a fallback.
 
 ---
 
 ## JavaScript API (`window.apeironData`)
 
-On protected article pages, the following object is available:
+Available on **Full mode** article pages:
 
 ```js
 window.apeironData = {
@@ -215,15 +302,26 @@ window.apeironData = {
 }
 ```
 
-AI agents can use this to pay programmatically:
+---
 
-```js
-const provider = new ethers.JsonRpcProvider('https://mainnet.base.org');
-const signer   = new ethers.Wallet(PRIVATE_KEY, provider);
-const gateway  = new ethers.Contract(apeironData.gatewayAddress, [
-  'function unlockAsAgent(bytes32 contentId, uint256 duration)'
-], signer);
-await gateway.unlockAsAgent(apeironData.contentId, 0n);
+## Example AI Agent (`agent-wp.mjs`)
+
+```bash
+# Add to .env.local
+AGENT_PRIVATE_KEY_2=0x...
+WP_POST_ID=6
+
+node agent-wp.mjs
+```
+
+```
+🤖  Apeiron WordPress Agent (x402)
+── Step 1: GET /wp-json/apeiron/v1/content/6   → 402 AI_LICENSE 1.00 USDC
+── Step 2: Setup wallet 0x6cBB...
+── Step 3: Check existing access → none
+── Step 4: Approve USDC ✓
+── Step 5: unlockAsAgent() → tx confirmed ✓
+── Step 6: GET + x-wallet-address              → 200 content unlocked ✓
 ```
 
 ---
@@ -235,20 +333,30 @@ await gateway.unlockAsAgent(apeironData.contentId, 0n);
 3. Copy this folder to `wp-content/plugins/`
 4. Activate the plugin
 5. Configure your publisher wallet in **Settings → Apeiron**
-6. Create a post, protect it, register on-chain
+6. Create a post, set protection mode, register on-chain
+7. Test with `node agent-wp.mjs`
 
 ---
 
 ## Changelog
 
+### v1.2.0
+- **Three protection modes**: `disabled`, `ai_only`, `full`
+- `ai_only`: humans read free, bots intercepted at `template_redirect` level with HTTP 402
+- x402 REST endpoint (`/wp-json/apeiron/v1/content/<post_id>`) respects protection mode
+- `ai_only` mode: humans get free content via REST endpoint too
+- Meta box UI: dropdown replaces checkbox, fields show/hide dynamically
+
 ### v1.1.0
 - Configurable preview paragraphs per article (1–20, default 4)
-- Fixed ABI compatibility with X402GatewayV3 (`registerContent`, `unlockAsHuman`, `unlockAsAgent`)
-- `contentId` now computed client-side with `ethers.keccak256` (Ethereum-compatible)
+- Fixed ABI compatibility with X402GatewayV3
+- `contentId` computed client-side with `ethers.keccak256`
 - Fixed ethers.js loading on admin pages
 - Analytics dashboard with on-chain revenue and access counts
 - Publisher wallet verification on dashboard connect
-- Publisher bypass on frontend (owner sees full content without paying)
+- Publisher bypass on frontend
+- x402 REST endpoint for AI agents
+- Fixed `hasAccess()` selector: `4a0f4a07` → `24ea5704`
 
 ### v1.0.0
 - Initial release

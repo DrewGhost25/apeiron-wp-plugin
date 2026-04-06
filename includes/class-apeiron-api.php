@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 class Apeiron_Api {
 
 	// Bot User-Agent regex — identico al SDK Apeiron Node.js
-	const KNOWN_BOTS = '/GPTBot|ClaudeBot|Google-Extended|anthropic|openai|bot|crawler|spider|X402-Agent/i';
+	const KNOWN_BOTS = '/GPTBot|ChatGPT-User|ClaudeBot|Claude-Web|Google-Extended|Googlebot|PerplexityBot|YouBot|Diffbot|CCBot|FacebookBot|Applebot|BingBot|anthropic|openai|bot|crawler|spider|X402-Agent/i';
 
 	public function init(): void {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
@@ -84,9 +84,14 @@ class Apeiron_Api {
 			return new WP_REST_Response( [ 'error' => 'Post not found' ], 404 );
 		}
 
-		// Post non protetto → accesso libero
-		$protected = get_post_meta( $post_id, '_apeiron_protected', true );
-		if ( '1' !== $protected ) {
+		// Legge modalità con retrocompatibilità
+		$mode = get_post_meta( $post_id, '_apeiron_mode', true );
+		if ( ! $mode ) {
+			$mode = get_post_meta( $post_id, '_apeiron_protected', true ) === '1' ? 'full' : 'disabled';
+		}
+
+		// Nessuna protezione → accesso libero
+		if ( 'disabled' === $mode ) {
 			return $this->response_content( $post );
 		}
 
@@ -105,8 +110,13 @@ class Apeiron_Api {
 		// Rilevamento bot via User-Agent
 		$user_agent  = $request->get_header( 'user_agent' ) ?? '';
 		$is_bot      = (bool) preg_match( self::KNOWN_BOTS, $user_agent );
-		$access_type = $is_bot ? 1 : 0; // 1=AI, 0=human
+		$access_type = $is_bot ? 1 : 0;
 		$price_usdc  = $is_bot ? $ai_price : $human_price;
+
+		// Modalità ai_only → umani ricevono contenuto libero via REST
+		if ( 'ai_only' === $mode && ! $is_bot ) {
+			return $this->response_content( $post );
+		}
 		$price_wei   = $this->usdc_to_wei( $price_usdc );
 
 		$gateway_address = get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY );
