@@ -64,15 +64,15 @@
 				const shortConnected = connectedAddr.substring( 0, 6 ) + '…' + connectedAddr.slice( -4 );
 
 				const confirmed = window.confirm(
-					'⚠️ Wallet diverso dal Publisher Wallet configurato nelle impostazioni!\n\n' +
-					'Configurato:  ' + shortExpected + '\n' +
-					'Connesso ora: ' + shortConnected + '\n\n' +
-					'I pagamenti verranno inviati al wallet connesso, NON a quello configurato.\n\n' +
-					'Vuoi continuare comunque?'
+					'⚠️ Connected wallet differs from the Publisher Wallet set in settings!\n\n' +
+					'Configured: ' + shortExpected + '\n' +
+					'Connected:  ' + shortConnected + '\n\n' +
+					'Payments will be sent to the connected wallet, NOT the configured one.\n\n' +
+					'Do you want to continue anyway?'
 				);
 
 				if ( ! confirmed ) {
-					statusEl.text( 'Operazione annullata. Cambia wallet in MetaMask e riprova.' ).css( 'color', '#e74c3c' );
+					statusEl.text( 'Operation cancelled. Switch wallet in MetaMask and try again.' ).css( 'color', '#e74c3c' );
 					btn.prop( 'disabled', false );
 					return;
 				}

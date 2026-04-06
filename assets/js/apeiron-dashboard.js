@@ -67,11 +67,11 @@
 
 	async function connectWallet() {
 		hideWalletError();
-		btn.textContent = 'Connessione…';
+		btn.textContent = 'Connecting…';
 		btn.disabled    = true;
 
 		if ( ! window.ethereum ) {
-			showWalletError( '⚠ MetaMask non trovato. Installa l\'estensione e ricarica.' );
+			showWalletError( '⚠ MetaMask not found. Install the extension and reload.' );
 			btn.textContent = 'Connect Wallet';
 			btn.disabled    = false;
 			return;
@@ -84,7 +84,7 @@
 			// Verifica chain
 			const network = await provider.getNetwork();
 			if ( Number( network.chainId ) !== Number( chainId ) ) {
-				showWalletError( '⚠ Rete errata. Passa a Base Mainnet (Chain ID 8453) in MetaMask.' );
+				showWalletError( '⚠ Wrong network. Switch to Base Mainnet (Chain ID 8453) in MetaMask.' );
 				btn.textContent = 'Connect Wallet';
 				btn.disabled    = false;
 				return;
@@ -98,9 +98,9 @@
 				const shortExpected  = publisherWallet.substring( 0, 6 ) + '…' + publisherWallet.slice( -4 );
 				const shortConnected = address.substring( 0, 6 ) + '…' + address.slice( -4 );
 				showWalletError(
-					'⚠ Wallet non corrispondente.\n' +
-					'Atteso: ' + shortExpected + ' — Connesso: ' + shortConnected + '\n' +
-					'Seleziona il wallet publisher in MetaMask e riprova.'
+					'⚠ Wallet mismatch.\n' +
+					'Expected: ' + shortExpected + ' — Connected: ' + shortConnected + '\n' +
+					'Select your publisher wallet in MetaMask and try again.'
 				);
 				btn.textContent = 'Connect Wallet';
 				btn.disabled    = false;
@@ -115,7 +115,7 @@
 			await loadAnalytics();
 
 		} catch ( err ) {
-			showWalletError( '⚠ Errore: ' + ( err.message || String( err ) ) );
+			showWalletError( '⚠ Error: ' + ( err.message || String( err ) ) );
 			btn.textContent = 'Connect Wallet';
 			btn.disabled    = false;
 		}
@@ -174,7 +174,7 @@
 					loadingEl.querySelector( 'span' )
 						? null
 						: null;
-					loadingEl.lastChild.textContent = ' Lettura dati on-chain… ' + pct + '%';
+					loadingEl.lastChild.textContent = ' Reading on-chain data… ' + pct + '%';
 				}
 			}
 
@@ -239,8 +239,8 @@
 
 		} catch ( err ) {
 			console.error( 'Apeiron dashboard getLogs:', err );
-			setKpi( 'dash-total-revenue', 'Errore' );
-			showWalletError( '⚠ Errore lettura blockchain: ' + ( err.message || String( err ) ) );
+			setKpi( 'dash-total-revenue', 'Error' );
+			showWalletError( '⚠ Error reading blockchain: ' + ( err.message || String( err ) ) );
 		} finally {
 			setLoading( false );
 		}

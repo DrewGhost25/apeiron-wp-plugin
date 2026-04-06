@@ -57,7 +57,7 @@ defined( 'ABSPATH' ) || exit;
 		        type="button">
 			<?php
 			printf(
-				/* translators: %s: prezzo in USDC */
+				/* translators: %s: price in USDC */
 				esc_html__( 'Pay %s USDC', 'apeiron' ),
 				esc_html( number_format( (float) $human_price, 2 ) )
 			);
@@ -68,7 +68,7 @@ defined( 'ABSPATH' ) || exit;
 		<p id="apeiron-status" class="apeiron-status" aria-live="polite"></p>
 
 		<!-- Steps -->
-		<ol class="apeiron-steps" aria-label="<?php esc_attr_e( 'Passaggi', 'apeiron' ); ?>">
+		<ol class="apeiron-steps" aria-label="<?php esc_attr_e( 'Steps', 'apeiron' ); ?>">
 			<li>
 				<span class="step-num">1</span>
 				<?php esc_html_e( 'Connect', 'apeiron' ); ?>

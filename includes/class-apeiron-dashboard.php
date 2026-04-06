@@ -93,7 +93,7 @@ class Apeiron_Dashboard {
 			<!-- Loading state -->
 			<div id="apeiron-dash-loading" style="display:none" class="apeiron-dash-loading">
 				<span class="apeiron-dash-spinner"></span>
-				<?php esc_html_e( 'Lettura dati on-chain…', 'apeiron' ); ?>
+				<?php esc_html_e( 'Reading on-chain data…', 'apeiron' ); ?>
 			</div>
 
 			<!-- Tabella articoli -->
@@ -129,7 +129,7 @@ class Apeiron_Dashboard {
 						<?php if ( empty( $articles ) ) : ?>
 							<tr>
 								<td colspan="5" class="apeiron-dash-empty">
-									<?php esc_html_e( 'Nessun articolo protetto trovato. Crea e registra il tuo primo articolo.', 'apeiron' ); ?>
+									<?php esc_html_e( 'No protected articles found. Create and register your first article.', 'apeiron' ); ?>
 								</td>
 							</tr>
 						<?php endif; ?>

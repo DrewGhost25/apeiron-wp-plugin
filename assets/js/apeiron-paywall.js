@@ -176,7 +176,7 @@
 		if ( allowance >= amountWei ) return; // già approvato
 
 		const tx = await usdc.approve( gatewayAddress, amountWei );
-		setStatus( 'Approvazione in corso… (tx: ' + tx.hash.substring( 0, 12 ) + '…)' );
+		setStatus( 'Approving… (tx: ' + tx.hash.substring( 0, 12 ) + '…)' );
 		await tx.wait();
 	}
 
@@ -191,7 +191,7 @@
 
 		setStatus( i18n.paying );
 		const gateway = new ethers.Contract( gatewayAddress, GATEWAY_ABI, signer );
-		const tx      = await gateway.unlockAsHuman( contentId, 0n ); // 0 = accesso permanente
+		const tx      = await gateway.unlockAsHuman( contentId, 0n ); // 0 = permanent access
 
 		setStatus( i18n.unlocking + ' tx: ' + tx.hash.substring( 0, 12 ) + '…' );
 		await tx.wait();
@@ -215,7 +215,7 @@
 
 		// Publisher bypass — se il wallet connesso è il publisher, accesso diretto
 		if ( publisherWallet && wallet.toLowerCase() === publisherWallet.toLowerCase() ) {
-			setStatus( 'Publisher riconosciuto — accesso completo.' );
+			setStatus( 'Publisher recognized — full access.' );
 			setTimeout( showContent, 600 );
 			return;
 		}
@@ -249,7 +249,7 @@
 
 		try {
 			await unlockAsHuman();
-			setStatus( 'Accesso sbloccato!' );
+			setStatus( 'Access unlocked!' );
 			setTimeout( showContent, 600 );
 		} catch ( err ) {
 			const msg = err.reason || err.message || String( err );
@@ -274,7 +274,7 @@
 
 		// Se ethers non è disponibile, mostra avviso
 		if ( typeof ethers === 'undefined' ) {
-			setStatus( 'Errore: libreria Web3 non caricata. Ricarica la pagina.', true );
+			setStatus( 'Error: Web3 library not loaded. Reload the page.', true );
 		}
 	}
 

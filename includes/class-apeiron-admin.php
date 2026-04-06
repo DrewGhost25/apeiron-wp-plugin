@@ -165,15 +165,15 @@ class Apeiron_Admin {
 		$content_id    = get_post_meta( $post->ID, '_apeiron_content_id', true );
 
 		$modes = [
-			'disabled' => __( '🔓 Disabled — nessuna protezione', 'apeiron' ),
-			'ai_only'  => __( '🤖 AI Only — umani gratis, bot pagano', 'apeiron' ),
-			'full'     => __( '🔒 Full — paywall per tutti', 'apeiron' ),
+			'disabled' => __( '🔓 Disabled — no protection', 'apeiron' ),
+			'ai_only'  => __( '🤖 AI Only — humans free, bots pay', 'apeiron' ),
+			'full'     => __( '🔒 Full — paywall for everyone', 'apeiron' ),
 		];
 		?>
 		<div class="apeiron-meta-box">
 
 			<p>
-				<label for="apeiron_mode"><strong><?php esc_html_e( 'Modalità protezione', 'apeiron' ); ?></strong></label><br>
+				<label for="apeiron_mode"><strong><?php esc_html_e( 'Protection Mode', 'apeiron' ); ?></strong></label><br>
 				<select id="apeiron_mode" name="apeiron_mode" style="width:100%;margin-top:4px">
 					<?php foreach ( $modes as $val => $label ) : ?>
 						<option value="<?php echo esc_attr( $val ); ?>" <?php selected( $mode, $val ); ?>>
@@ -187,7 +187,7 @@ class Apeiron_Admin {
 
 				<p>
 					<label for="apeiron_ai_price">
-						<?php esc_html_e( 'Prezzo agenti AI (USDC)', 'apeiron' ); ?>
+						<?php esc_html_e( 'AI agent price (USDC)', 'apeiron' ); ?>
 					</label><br>
 					<input type="number"
 					       id="apeiron_ai_price"
@@ -199,12 +199,11 @@ class Apeiron_Admin {
 
 				<div id="apeiron-human-price-field">
 					<div id="apeiron-ai-only-notice" style="<?php echo $mode !== 'ai_only' ? 'display:none;' : ''; ?>background:#1a2a3a;border-left:3px solid #c8a96e;padding:8px 10px;margin-bottom:8px;border-radius:3px;font-size:12px;color:#c8a96e;line-height:1.4">
-						ℹ️ <strong><?php esc_html_e( 'Richiesto dallo smart contract', 'apeiron' ); ?></strong><br>
-						<?php esc_html_e( 'Il contratto X402GatewayV3 richiede entrambi i prezzi alla registrazione. I lettori umani accederanno gratis — solo i bot pagheranno.', 'apeiron' ); ?>
+						ℹ️ <?php esc_html_e( 'The smart contract requires a human price at registration. Human readers will not be wallet-checked — they access content freely. Only AI bots are gated.', 'apeiron' ); ?>
 					</div>
 					<p>
 						<label for="apeiron_human_price">
-							<?php esc_html_e( 'Prezzo lettori umani (USDC)', 'apeiron' ); ?>
+							<?php esc_html_e( 'Human reader price (USDC)', 'apeiron' ); ?>
 						</label><br>
 						<input type="number"
 						       id="apeiron_human_price"
@@ -216,7 +215,7 @@ class Apeiron_Admin {
 					<div id="apeiron-preview-field" <?php echo $mode === 'ai_only' ? 'style="display:none"' : ''; ?>>
 						<p>
 							<label for="apeiron_preview_paras">
-								<?php esc_html_e( 'Paragrafi in anteprima', 'apeiron' ); ?>
+								<?php esc_html_e( 'Preview paragraphs', 'apeiron' ); ?>
 							</label><br>
 							<input type="number"
 							       id="apeiron_preview_paras"
@@ -224,7 +223,7 @@ class Apeiron_Admin {
 							       value="<?php echo esc_attr( $preview_paras ); ?>"
 							       step="1" min="1" max="20"
 							       style="width:100%" />
-							<small style="color:#888"><?php esc_html_e( 'Solo in modalità Full (default: 4)', 'apeiron' ); ?></small>
+							<small style="color:#888"><?php esc_html_e( 'Full mode only (default: 4)', 'apeiron' ); ?></small>
 						</p>
 					</div>
 				</div>
@@ -233,12 +232,12 @@ class Apeiron_Admin {
 
 				<p class="apeiron-status">
 					<?php if ( $registered ) : ?>
-						<span class="apeiron-registered">&#10003; <?php esc_html_e( 'Registrato on-chain', 'apeiron' ); ?></span>
+						<span class="apeiron-registered">&#10003; <?php esc_html_e( 'Registered on-chain', 'apeiron' ); ?></span>
 						<?php if ( $content_id ) : ?>
 							<br><small>ID: <code><?php echo esc_html( substr( $content_id, 0, 12 ) . '…' ); ?></code></small>
 						<?php endif; ?>
 					<?php else : ?>
-						<span class="apeiron-not-registered">&#9679; <?php esc_html_e( 'Non ancora registrato', 'apeiron' ); ?></span>
+						<span class="apeiron-not-registered">&#9679; <?php esc_html_e( 'Not yet registered', 'apeiron' ); ?></span>
 					<?php endif; ?>
 				</p>
 
@@ -249,7 +248,7 @@ class Apeiron_Admin {
 				        data-post-url="<?php echo esc_url( get_permalink( $post->ID ) ); ?>"
 				        data-human-price="<?php echo esc_attr( $human_price ); ?>"
 				        data-ai-price="<?php echo esc_attr( $ai_price ); ?>">
-					<?php esc_html_e( 'Registra su blockchain', 'apeiron' ); ?>
+					<?php esc_html_e( 'Register on blockchain', 'apeiron' ); ?>
 				</button>
 				<span id="apeiron-register-status" style="margin-left:8px;"></span>
 
@@ -360,12 +359,12 @@ class Apeiron_Admin {
 			'publisherWallet' => get_option( 'apeiron_publisher_wallet', '' ),
 			'chainId'         => APEIRON_CHAIN_ID,
 			'i18n'            => [
-				'connecting'  => __( 'Connessione wallet…', 'apeiron' ),
-				'registering' => __( 'Preparazione transazione…', 'apeiron' ),
-				'success'     => __( 'Registrato! TX: ', 'apeiron' ),
-				'error'       => __( 'Errore: ', 'apeiron' ),
-				'noMetaMask'  => __( 'MetaMask non trovato. Installalo e riprova.', 'apeiron' ),
-				'wrongChain'  => __( 'Passa a Base Mainnet (Chain ID 8453) in MetaMask.', 'apeiron' ),
+				'connecting'  => __( 'Connecting wallet…', 'apeiron' ),
+				'registering' => __( 'Preparing transaction…', 'apeiron' ),
+				'success'     => __( 'Registered! TX: ', 'apeiron' ),
+				'error'       => __( 'Error: ', 'apeiron' ),
+				'noMetaMask'  => __( 'MetaMask not found. Install it and try again.', 'apeiron' ),
+				'wrongChain'  => __( 'Switch to Base Mainnet (Chain ID 8453) in MetaMask.', 'apeiron' ),
 			],
 		] );
 	}
