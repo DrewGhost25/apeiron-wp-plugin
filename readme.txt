@@ -1,5 +1,5 @@
 === Apeiron — Web3 Content Paywall ===
-Contributors:      apeiron
+Contributors:      drewghost25
 Tags:              paywall, web3, crypto, usdc, blockchain, monetization, base, metamask
 Requires at least: 6.0
 Tested up to:      6.7
