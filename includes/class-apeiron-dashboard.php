@@ -23,7 +23,7 @@ class Apeiron_Dashboard {
 			'edit_posts',
 			'apeiron-dashboard',
 			[ $this, 'render_page' ],
-			'data:image/svg+xml;base64,' . base64_encode( '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#c8a96e" d="M12 2L2 19h20L12 2zm0 3.5L19.5 18h-15L12 5.5z"/></svg>' ),
+			APEIRON_URL . 'assets/images/apeiron-icon.svg',
 			30
 		);
 
@@ -84,7 +84,7 @@ class Apeiron_Dashboard {
 				</div>
 				<div class="apeiron-dash-kpi">
 					<span class="apeiron-dash-kpi-value apeiron-dash-kpi-muted" id="dash-total-articles">
-						<?php echo count( $articles ); ?>
+						<?php echo absint( count( $articles ) ); ?>
 					</span>
 					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'PUBLISHED ARTICLES', 'apeiron' ); ?></span>
 				</div>
