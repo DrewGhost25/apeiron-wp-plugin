@@ -16,8 +16,8 @@ class Apeiron_Admin {
 
 	public function register_menu(): void {
 		add_options_page(
-			__( 'Apeiron Settings', 'apeiron' ),
-			__( 'Apeiron', 'apeiron' ),
+			__( 'Apeiron Settings', 'apeiron-web3-content-paywall' ),
+			__( 'Apeiron', 'apeiron-web3-content-paywall' ),
 			'manage_options',
 			'apeiron-settings',
 			[ $this, 'render_settings_page' ]
@@ -28,15 +28,15 @@ class Apeiron_Admin {
 
 	public function register_settings(): void {
 		$fields = [
-			'publisher_wallet' => __( 'Publisher Wallet Address', 'apeiron' ),
-			'gateway_address'  => __( 'Gateway Contract Address', 'apeiron' ),
-			'usdc_address'     => __( 'USDC Token Address', 'apeiron' ),
-			'rpc_url'          => __( 'Base RPC URL', 'apeiron' ),
+			'publisher_wallet' => __( 'Publisher Wallet Address', 'apeiron-web3-content-paywall' ),
+			'gateway_address'  => __( 'Gateway Contract Address', 'apeiron-web3-content-paywall' ),
+			'usdc_address'     => __( 'USDC Token Address', 'apeiron-web3-content-paywall' ),
+			'rpc_url'          => __( 'Base RPC URL', 'apeiron-web3-content-paywall' ),
 		];
 
 		add_settings_section(
 			'apeiron_main',
-			__( 'Blockchain Settings', 'apeiron' ),
+			__( 'Blockchain Settings', 'apeiron-web3-content-paywall' ),
 			null,
 			'apeiron-settings'
 		);
@@ -74,31 +74,31 @@ class Apeiron_Admin {
 		}
 		?>
 		<div class="wrap apeiron-settings-wrap">
-			<h1><?php esc_html_e( 'Apeiron — Web3 Paywall', 'apeiron' ); ?></h1>
+			<h1><?php esc_html_e( 'Apeiron — Web3 Paywall', 'apeiron-web3-content-paywall' ); ?></h1>
 
 			<div class="apeiron-fee-notice">
-				<strong><?php esc_html_e( 'Apeiron uses a tiered fee model — fairer for small publishers, competitive for enterprise:', 'apeiron' ); ?></strong>
+				<strong><?php esc_html_e( 'Apeiron uses a tiered fee model — fairer for small publishers, competitive for enterprise:', 'apeiron-web3-content-paywall' ); ?></strong>
 				<table class="apeiron-fee-table">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'Transaction size', 'apeiron' ); ?></th>
-							<th><?php esc_html_e( 'Platform fee', 'apeiron' ); ?></th>
-							<th><?php esc_html_e( 'Publisher receives', 'apeiron' ); ?></th>
+							<th><?php esc_html_e( 'Transaction size', 'apeiron-web3-content-paywall' ); ?></th>
+							<th><?php esc_html_e( 'Platform fee', 'apeiron-web3-content-paywall' ); ?></th>
+							<th><?php esc_html_e( 'Publisher receives', 'apeiron-web3-content-paywall' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr>
-							<td><?php esc_html_e( 'Up to $10 USDC', 'apeiron' ); ?></td>
+							<td><?php esc_html_e( 'Up to $10 USDC', 'apeiron-web3-content-paywall' ); ?></td>
 							<td>10%</td>
 							<td>90%</td>
 						</tr>
 						<tr>
-							<td><?php esc_html_e( '$10 — $100 USDC', 'apeiron' ); ?></td>
+							<td><?php esc_html_e( '$10 — $100 USDC', 'apeiron-web3-content-paywall' ); ?></td>
 							<td>5%</td>
 							<td>95%</td>
 						</tr>
 						<tr>
-							<td><?php esc_html_e( 'Above $100 USDC', 'apeiron' ); ?></td>
+							<td><?php esc_html_e( 'Above $100 USDC', 'apeiron-web3-content-paywall' ); ?></td>
 							<td>2%</td>
 							<td>98%</td>
 						</tr>
@@ -107,13 +107,13 @@ class Apeiron_Admin {
 			</div>
 
 			<div class="apeiron-fee-notice" style="margin-top:20px">
-				<strong><?php esc_html_e( 'Interceptable AI Bots', 'apeiron' ); ?></strong>
-				<p style="margin:4px 0 8px;color:#888;font-size:13px"><?php esc_html_e( 'These User-Agent patterns are automatically detected and subject to the x402 paywall in AI Only and Full modes.', 'apeiron' ); ?></p>
+				<strong><?php esc_html_e( 'Interceptable AI Bots', 'apeiron-web3-content-paywall' ); ?></strong>
+				<p style="margin:4px 0 8px;color:#888;font-size:13px"><?php esc_html_e( 'These User-Agent patterns are automatically detected and subject to the x402 paywall in AI Only and Full modes.', 'apeiron-web3-content-paywall' ); ?></p>
 				<table class="apeiron-fee-table">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'Bot / User-Agent', 'apeiron' ); ?></th>
-							<th><?php esc_html_e( 'Company', 'apeiron' ); ?></th>
+							<th><?php esc_html_e( 'Bot / User-Agent', 'apeiron-web3-content-paywall' ); ?></th>
+							<th><?php esc_html_e( 'Company', 'apeiron-web3-content-paywall' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -151,7 +151,7 @@ class Apeiron_Admin {
 	public function add_meta_box(): void {
 		add_meta_box(
 			'apeiron_meta',
-			__( 'Apeiron Paywall', 'apeiron' ),
+			__( 'Apeiron Paywall', 'apeiron-web3-content-paywall' ),
 			[ $this, 'render_meta_box' ],
 			'post',
 			'side',
@@ -176,15 +176,15 @@ class Apeiron_Admin {
 		$content_id    = get_post_meta( $post->ID, '_apeiron_content_id', true );
 
 		$modes = [
-			'disabled' => __( '🔓 Disabled — no protection', 'apeiron' ),
-			'ai_only'  => __( '🤖 AI Only — humans free, bots pay', 'apeiron' ),
-			'full'     => __( '🔒 Full — paywall for everyone', 'apeiron' ),
+			'disabled' => __( '🔓 Disabled — no protection', 'apeiron-web3-content-paywall' ),
+			'ai_only'  => __( '🤖 AI Only — humans free, bots pay', 'apeiron-web3-content-paywall' ),
+			'full'     => __( '🔒 Full — paywall for everyone', 'apeiron-web3-content-paywall' ),
 		];
 		?>
 		<div class="apeiron-meta-box">
 
 			<p>
-				<label for="apeiron_mode"><strong><?php esc_html_e( 'Protection Mode', 'apeiron' ); ?></strong></label><br>
+				<label for="apeiron_mode"><strong><?php esc_html_e( 'Protection Mode', 'apeiron-web3-content-paywall' ); ?></strong></label><br>
 				<select id="apeiron_mode" name="apeiron_mode" style="width:100%;margin-top:4px">
 					<?php foreach ( $modes as $val => $label ) : ?>
 						<option value="<?php echo esc_attr( $val ); ?>" <?php selected( $mode, $val ); ?>>
@@ -198,7 +198,7 @@ class Apeiron_Admin {
 
 				<p>
 					<label for="apeiron_ai_price">
-						<?php esc_html_e( 'AI agent price (USDC)', 'apeiron' ); ?>
+						<?php esc_html_e( 'AI agent price (USDC)', 'apeiron-web3-content-paywall' ); ?>
 					</label><br>
 					<input type="number"
 					       id="apeiron_ai_price"
@@ -210,11 +210,11 @@ class Apeiron_Admin {
 
 				<div id="apeiron-human-price-field">
 					<div id="apeiron-ai-only-notice" style="<?php echo $mode !== 'ai_only' ? 'display:none;' : ''; ?>background:#1a2a3a;border-left:3px solid #c8a96e;padding:8px 10px;margin-bottom:8px;border-radius:3px;font-size:12px;color:#c8a96e;line-height:1.4">
-						ℹ️ <?php esc_html_e( 'The smart contract requires a human price at registration. Human readers will not be wallet-checked — they access content freely. Only AI bots are gated.', 'apeiron' ); ?>
+						ℹ️ <?php esc_html_e( 'The smart contract requires a human price at registration. Human readers will not be wallet-checked — they access content freely. Only AI bots are gated.', 'apeiron-web3-content-paywall' ); ?>
 					</div>
 					<p>
 						<label for="apeiron_human_price">
-							<?php esc_html_e( 'Human reader price (USDC)', 'apeiron' ); ?>
+							<?php esc_html_e( 'Human reader price (USDC)', 'apeiron-web3-content-paywall' ); ?>
 						</label><br>
 						<input type="number"
 						       id="apeiron_human_price"
@@ -226,7 +226,7 @@ class Apeiron_Admin {
 					<div id="apeiron-preview-field" <?php echo $mode === 'ai_only' ? 'style="display:none"' : ''; ?>>
 						<p>
 							<label for="apeiron_preview_paras">
-								<?php esc_html_e( 'Preview paragraphs', 'apeiron' ); ?>
+								<?php esc_html_e( 'Preview paragraphs', 'apeiron-web3-content-paywall' ); ?>
 							</label><br>
 							<input type="number"
 							       id="apeiron_preview_paras"
@@ -234,7 +234,7 @@ class Apeiron_Admin {
 							       value="<?php echo esc_attr( $preview_paras ); ?>"
 							       step="1" min="1" max="20"
 							       style="width:100%" />
-							<small style="color:#888"><?php esc_html_e( 'Full mode only (default: 4)', 'apeiron' ); ?></small>
+							<small style="color:#888"><?php esc_html_e( 'Full mode only (default: 4)', 'apeiron-web3-content-paywall' ); ?></small>
 						</p>
 					</div>
 				</div>
@@ -243,12 +243,12 @@ class Apeiron_Admin {
 
 				<p class="apeiron-status">
 					<?php if ( $registered ) : ?>
-						<span class="apeiron-registered">&#10003; <?php esc_html_e( 'Registered on-chain', 'apeiron' ); ?></span>
+						<span class="apeiron-registered">&#10003; <?php esc_html_e( 'Registered on-chain', 'apeiron-web3-content-paywall' ); ?></span>
 						<?php if ( $content_id ) : ?>
 							<br><small>ID: <code><?php echo esc_html( substr( $content_id, 0, 12 ) . '…' ); ?></code></small>
 						<?php endif; ?>
 					<?php else : ?>
-						<span class="apeiron-not-registered">&#9679; <?php esc_html_e( 'Not yet registered', 'apeiron' ); ?></span>
+						<span class="apeiron-not-registered">&#9679; <?php esc_html_e( 'Not yet registered', 'apeiron-web3-content-paywall' ); ?></span>
 					<?php endif; ?>
 				</p>
 
@@ -259,7 +259,7 @@ class Apeiron_Admin {
 				        data-post-url="<?php echo esc_url( get_permalink( $post->ID ) ); ?>"
 				        data-human-price="<?php echo esc_attr( $human_price ); ?>"
 				        data-ai-price="<?php echo esc_attr( $ai_price ); ?>">
-					<?php esc_html_e( 'Register on blockchain', 'apeiron' ); ?>
+					<?php esc_html_e( 'Register on blockchain', 'apeiron-web3-content-paywall' ); ?>
 				</button>
 				<span id="apeiron-register-status" style="margin-left:8px;"></span>
 
@@ -371,12 +371,12 @@ class Apeiron_Admin {
 			'publisherWallet' => get_option( 'apeiron_publisher_wallet', '' ),
 			'chainId'         => APEIRON_CHAIN_ID,
 			'i18n'            => [
-				'connecting'  => __( 'Connecting wallet…', 'apeiron' ),
-				'registering' => __( 'Preparing transaction…', 'apeiron' ),
-				'success'     => __( 'Registered! TX: ', 'apeiron' ),
-				'error'       => __( 'Error: ', 'apeiron' ),
-				'noMetaMask'  => __( 'MetaMask not found. Install it and try again.', 'apeiron' ),
-				'wrongChain'  => __( 'Switch to Base Mainnet (Chain ID 8453) in MetaMask.', 'apeiron' ),
+				'connecting'  => __( 'Connecting wallet…', 'apeiron-web3-content-paywall' ),
+				'registering' => __( 'Preparing transaction…', 'apeiron-web3-content-paywall' ),
+				'success'     => __( 'Registered! TX: ', 'apeiron-web3-content-paywall' ),
+				'error'       => __( 'Error: ', 'apeiron-web3-content-paywall' ),
+				'noMetaMask'  => __( 'MetaMask not found. Install it and try again.', 'apeiron-web3-content-paywall' ),
+				'wrongChain'  => __( 'Switch to Base Mainnet (Chain ID 8453) in MetaMask.', 'apeiron-web3-content-paywall' ),
 			],
 		] );
 	}

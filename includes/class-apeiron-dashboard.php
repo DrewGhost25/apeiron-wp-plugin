@@ -18,8 +18,8 @@ class Apeiron_Dashboard {
 	public function register_menu(): void {
 		// Menu top-level Apeiron
 		add_menu_page(
-			__( 'Apeiron', 'apeiron' ),
-			__( 'Apeiron', 'apeiron' ),
+			__( 'Apeiron', 'apeiron-web3-content-paywall' ),
+			__( 'Apeiron', 'apeiron-web3-content-paywall' ),
 			'edit_posts',
 			'apeiron-dashboard',
 			[ $this, 'render_page' ],
@@ -30,8 +30,8 @@ class Apeiron_Dashboard {
 		// Unico sottomenu: Analytics
 		add_submenu_page(
 			'apeiron-dashboard',
-			__( 'Analytics', 'apeiron' ),
-			__( 'Analytics', 'apeiron' ),
+			__( 'Analytics', 'apeiron-web3-content-paywall' ),
+			__( 'Analytics', 'apeiron-web3-content-paywall' ),
 			'edit_posts',
 			'apeiron-dashboard',
 			[ $this, 'render_page' ]
@@ -55,12 +55,12 @@ class Apeiron_Dashboard {
 				<div>
 					<h1 class="apeiron-dash-title">Analytics</h1>
 					<p class="apeiron-dash-subtitle">
-						<?php esc_html_e( 'Connect your wallet to see readers, bots and earnings.', 'apeiron' ); ?>
+						<?php esc_html_e( 'Connect your wallet to see readers, bots and earnings.', 'apeiron-web3-content-paywall' ); ?>
 					</p>
 				</div>
 				<div class="apeiron-dash-actions">
 					<button id="apeiron-dash-connect" class="apeiron-dash-btn apeiron-dash-btn-connect">
-						<?php esc_html_e( 'Connect Wallet', 'apeiron' ); ?>
+						<?php esc_html_e( 'Connect Wallet', 'apeiron-web3-content-paywall' ); ?>
 					</button>
 				</div>
 			</div>
@@ -72,28 +72,28 @@ class Apeiron_Dashboard {
 			<div class="apeiron-dash-kpis">
 				<div class="apeiron-dash-kpi">
 					<span class="apeiron-dash-kpi-value apeiron-dash-kpi-revenue" id="dash-total-revenue">—</span>
-					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'TOTAL REVENUE (USDC)', 'apeiron' ); ?></span>
+					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'TOTAL REVENUE (USDC)', 'apeiron-web3-content-paywall' ); ?></span>
 				</div>
 				<div class="apeiron-dash-kpi">
 					<span class="apeiron-dash-kpi-value" id="dash-total-humans">—</span>
-					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'HUMAN READERS', 'apeiron' ); ?></span>
+					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'HUMAN READERS', 'apeiron-web3-content-paywall' ); ?></span>
 				</div>
 				<div class="apeiron-dash-kpi apeiron-dash-kpi-ai">
 					<span class="apeiron-dash-kpi-value apeiron-dash-kpi-ai-val" id="dash-total-bots">—</span>
-					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'AI BOTS INTERCEPTED', 'apeiron' ); ?></span>
+					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'AI BOTS INTERCEPTED', 'apeiron-web3-content-paywall' ); ?></span>
 				</div>
 				<div class="apeiron-dash-kpi">
 					<span class="apeiron-dash-kpi-value apeiron-dash-kpi-muted" id="dash-total-articles">
 						<?php echo absint( count( $articles ) ); ?>
 					</span>
-					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'PUBLISHED ARTICLES', 'apeiron' ); ?></span>
+					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'PUBLISHED ARTICLES', 'apeiron-web3-content-paywall' ); ?></span>
 				</div>
 			</div>
 
 			<!-- Loading state -->
 			<div id="apeiron-dash-loading" style="display:none" class="apeiron-dash-loading">
 				<span class="apeiron-dash-spinner"></span>
-				<?php esc_html_e( 'Reading on-chain data…', 'apeiron' ); ?>
+				<?php esc_html_e( 'Reading on-chain data…', 'apeiron-web3-content-paywall' ); ?>
 			</div>
 
 			<!-- Tabella articoli -->
@@ -101,11 +101,11 @@ class Apeiron_Dashboard {
 				<table class="apeiron-dash-table">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'ARTICLE', 'apeiron' ); ?></th>
-							<th><?php esc_html_e( 'HUMANS', 'apeiron' ); ?></th>
-							<th><?php esc_html_e( 'BOTS', 'apeiron' ); ?></th>
-							<th><?php esc_html_e( 'REVENUE', 'apeiron' ); ?></th>
-							<th><?php esc_html_e( 'LINK', 'apeiron' ); ?></th>
+							<th><?php esc_html_e( 'ARTICLE', 'apeiron-web3-content-paywall' ); ?></th>
+							<th><?php esc_html_e( 'HUMANS', 'apeiron-web3-content-paywall' ); ?></th>
+							<th><?php esc_html_e( 'BOTS', 'apeiron-web3-content-paywall' ); ?></th>
+							<th><?php esc_html_e( 'REVENUE', 'apeiron-web3-content-paywall' ); ?></th>
+							<th><?php esc_html_e( 'LINK', 'apeiron-web3-content-paywall' ); ?></th>
 						</tr>
 					</thead>
 					<tbody id="apeiron-dash-tbody">
@@ -121,7 +121,7 @@ class Apeiron_Dashboard {
 								<td>
 									<a href="<?php echo esc_url( $article['url'] ); ?>"
 									   target="_blank" class="apeiron-dash-view-link">
-										<?php esc_html_e( 'View →', 'apeiron' ); ?>
+										<?php esc_html_e( 'View →', 'apeiron-web3-content-paywall' ); ?>
 									</a>
 								</td>
 							</tr>
@@ -129,7 +129,7 @@ class Apeiron_Dashboard {
 						<?php if ( empty( $articles ) ) : ?>
 							<tr>
 								<td colspan="5" class="apeiron-dash-empty">
-									<?php esc_html_e( 'No protected articles found. Create and register your first article.', 'apeiron' ); ?>
+									<?php esc_html_e( 'No protected articles found. Create and register your first article.', 'apeiron-web3-content-paywall' ); ?>
 								</td>
 							</tr>
 						<?php endif; ?>
