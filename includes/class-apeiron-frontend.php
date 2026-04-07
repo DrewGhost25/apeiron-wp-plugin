@@ -160,7 +160,7 @@ class Apeiron_Frontend {
 		wp_enqueue_style( 'apeiron-paywall', APEIRON_URL . 'assets/css/apeiron-paywall.css', [], APEIRON_VERSION );
 
 		wp_enqueue_script( 'ethers',
-			'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js',
+			APEIRON_URL . 'assets/js/ethers.umd.min.js',
 			[], '6.13.4', true
 		);
 

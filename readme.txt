@@ -149,11 +149,9 @@ All payments (USDC) flow through this contract. It handles access grants and fee
 Interaction only occurs when the publisher registers content or when a reader pays.
 [Basescan](https://basescan.org/address/0x6De5e0273428B14d88a690b200870f17888b0d77)
 
-**3. ethers.js via cdnjs (`https://cdnjs.cloudflare.com`)**
-Loaded on article pages (Full mode) and admin pages to handle wallet connections and transaction signing.
-This is a standard open-source library (MIT license) served via Cloudflare's CDN.
-[cdnjs Terms of Service](https://cdnjs.com/terms)
-[ethers.js on GitHub](https://github.com/ethers-io/ethers.js)
+**3. ethers.js v6.13.4 (bundled locally)**
+Included in the plugin package (`assets/js/ethers.umd.min.js`). Used on article pages (Full mode) and admin pages to handle wallet connections and transaction signing. No external CDN requests are made.
+License: MIT. Source: [ethers.js on GitHub](https://github.com/ethers-io/ethers.js)
 
 No data is sent to Apeiron servers. All blockchain interactions happen directly between the user's browser and the Base Mainnet RPC.
 
