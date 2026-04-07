@@ -267,23 +267,24 @@ class Apeiron_Admin {
 
 		</div>
 
-		<script>
-		( function() {
-			const sel     = document.getElementById( 'apeiron_mode' );
-			const fields  = document.getElementById( 'apeiron-price-fields' );
-			const notice  = document.getElementById( 'apeiron-ai-only-notice' );
-			const preview = document.getElementById( 'apeiron-preview-field' );
-
-			sel.addEventListener( 'change', function() {
-				const isDisabled = this.value === 'disabled';
-				const isAiOnly   = this.value === 'ai_only';
-				fields.style.display  = isDisabled ? 'none' : '';
-				notice.style.display  = isAiOnly   ? ''     : 'none';
-				preview.style.display = isAiOnly   ? 'none' : '';
-			} );
-		} )();
-		</script>
 		<?php
+		// Inline script via wp_add_inline_script (no direct <script> tags in templates)
+		wp_add_inline_script( 'apeiron-admin', '
+			( function() {
+				const sel     = document.getElementById( "apeiron_mode" );
+				const fields  = document.getElementById( "apeiron-price-fields" );
+				const notice  = document.getElementById( "apeiron-ai-only-notice" );
+				const preview = document.getElementById( "apeiron-preview-field" );
+				if ( ! sel ) return;
+				sel.addEventListener( "change", function() {
+					var isDisabled = this.value === "disabled";
+					var isAiOnly   = this.value === "ai_only";
+					fields.style.display  = isDisabled ? "none" : "";
+					notice.style.display  = isAiOnly   ? ""     : "none";
+					preview.style.display = isAiOnly   ? "none" : "";
+				} );
+			} )();
+		' );
 	}
 
 	public function save_meta( int $post_id, WP_Post $post ): void {

@@ -121,7 +121,7 @@ class Apeiron_Dashboard {
 								<td>
 									<a href="<?php echo esc_url( $article['url'] ); ?>"
 									   target="_blank" class="apeiron-dash-view-link">
-										View →
+										<?php esc_html_e( 'View →', 'apeiron' ); ?>
 									</a>
 								</td>
 							</tr>

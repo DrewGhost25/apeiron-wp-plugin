@@ -3,7 +3,7 @@
  * Plugin Name:       Apeiron — Web3 Content Paywall
  * Plugin URI:        https://apeiron-reader.com
  * Description:       Crypto paywall for WordPress articles on Base Mainnet. Payments in USDC via MetaMask.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            Apeiron
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // ── Constants ────────────────────────────────────────────────────────────────
-define( 'APEIRON_VERSION',  '1.1.0' );
+define( 'APEIRON_VERSION',  '1.2.0' );
 define( 'APEIRON_PATH',     plugin_dir_path( __FILE__ ) );
 define( 'APEIRON_URL',      plugin_dir_url( __FILE__ ) );
 define( 'APEIRON_BASENAME', plugin_basename( __FILE__ ) );
