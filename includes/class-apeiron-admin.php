@@ -27,6 +27,7 @@ class Apeiron_Admin {
 	// ── Settings globali ────────────────────────────────────────────────────
 
 	public function register_settings(): void {
+		// Blockchain settings
 		$fields = [
 			'publisher_wallet' => __( 'Publisher Wallet Address', 'apeiron-web3-content-paywall' ),
 			'gateway_address'  => __( 'Gateway Contract Address', 'apeiron-web3-content-paywall' ),
@@ -36,7 +37,7 @@ class Apeiron_Admin {
 
 		add_settings_section(
 			'apeiron_main',
-			__( 'Blockchain Settings', 'apeiron-web3-content-paywall' ),
+			__( 'Blockchain Settings (x402)', 'apeiron-web3-content-paywall' ),
 			null,
 			'apeiron-settings'
 		);
@@ -45,7 +46,6 @@ class Apeiron_Admin {
 			register_setting( 'apeiron_settings', "apeiron_{$key}", [
 				'sanitize_callback' => 'sanitize_text_field',
 			] );
-
 			add_settings_field(
 				"apeiron_{$key}",
 				$label,
@@ -55,6 +55,43 @@ class Apeiron_Admin {
 				[ 'key' => $key ]
 			);
 		}
+
+		// Registry settings
+		$registry_fields = [
+			'registry_url'             => __( 'Registry API URL', 'apeiron-web3-content-paywall' ),
+			'registry_publisher_email' => __( 'Publisher Email (for notifications)', 'apeiron-web3-content-paywall' ),
+		];
+
+		add_settings_section(
+			'apeiron_registry',
+			__( 'Apeiron Registry', 'apeiron-web3-content-paywall' ),
+			[ $this, 'render_registry_section_desc' ],
+			'apeiron-settings'
+		);
+
+		foreach ( $registry_fields as $key => $label ) {
+			register_setting( 'apeiron_settings', "apeiron_{$key}", [
+				'sanitize_callback' => 'sanitize_text_field',
+			] );
+			add_settings_field(
+				"apeiron_{$key}",
+				$label,
+				[ $this, 'render_text_field' ],
+				'apeiron-settings',
+				'apeiron_registry',
+				[ 'key' => $key ]
+			);
+		}
+	}
+
+	public function render_registry_section_desc(): void {
+		$default = get_option( 'apeiron_registry_url', '' );
+		if ( ! $default ) {
+			update_option( 'apeiron_registry_url', 'https://registry.apeiron.io/api/registry/verify' );
+		}
+		echo '<p style="color:#888;font-size:13px">'
+			. esc_html__( 'Enable per-article agent identification with Apeiron Registry. Publishers get email notifications when registered AI companies read their content.', 'apeiron-web3-content-paywall' )
+			. ' <a href="https://registry.apeiron.io/protect" target="_blank">Learn more →</a></p>';
 	}
 
 	public function render_text_field( array $args ): void {
@@ -176,9 +213,11 @@ class Apeiron_Admin {
 		$content_id    = get_post_meta( $post->ID, '_apeiron_content_id', true );
 
 		$modes = [
-			'disabled' => __( '🔓 Disabled — no protection', 'apeiron-web3-content-paywall' ),
-			'ai_only'  => __( '🤖 AI Only — humans free, bots pay', 'apeiron-web3-content-paywall' ),
-			'full'     => __( '🔒 Full — paywall for everyone', 'apeiron-web3-content-paywall' ),
+			'disabled'       => __( '🔓 Disabled — no protection', 'apeiron-web3-content-paywall' ),
+			'ai_only'        => __( '🤖 AI Only — humans free, bots pay (x402)', 'apeiron-web3-content-paywall' ),
+			'full'           => __( '🔒 Full — paywall for everyone (x402)', 'apeiron-web3-content-paywall' ),
+			'registry_log'   => __( '📋 Registry Log — allow all, log verified agents', 'apeiron-web3-content-paywall' ),
+			'registry_block' => __( '🛡 Registry Block — require Apeiron Registry ID', 'apeiron-web3-content-paywall' ),
 		];
 		?>
 		<div class="apeiron-meta-box">
@@ -298,7 +337,7 @@ class Apeiron_Admin {
 			return;
 		}
 
-		$allowed_modes = [ 'disabled', 'ai_only', 'full' ];
+		$allowed_modes = [ 'disabled', 'ai_only', 'full', 'registry_log', 'registry_block' ];
 		$mode          = isset( $_POST['apeiron_mode'] )
 			? sanitize_text_field( wp_unslash( $_POST['apeiron_mode'] ) )
 			: 'disabled';
