@@ -87,11 +87,11 @@ class Apeiron_Admin {
 	public function render_registry_section_desc(): void {
 		$default = get_option( 'apeiron_registry_url', '' );
 		if ( ! $default ) {
-			update_option( 'apeiron_registry_url', 'https://registry.apeiron.io/api/registry/verify' );
+			update_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
 		}
 		echo '<p style="color:#888;font-size:13px">'
 			. esc_html__( 'Enable per-article agent identification with Apeiron Registry. Publishers get email notifications when registered AI companies read their content.', 'apeiron-web3-content-paywall' )
-			. ' <a href="https://registry.apeiron.io/protect" target="_blank">Learn more →</a></p>';
+			. ' <a href="https://www.apeiron-registry.com/protect" target="_blank">Learn more →</a></p>';
 	}
 
 	public function render_text_field( array $args ): void {

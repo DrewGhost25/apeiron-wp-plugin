@@ -80,7 +80,7 @@ class Apeiron_Frontend {
 					echo wp_json_encode( [
 						'error'        => 'Invalid agent credentials',
 						'code'         => $cached['code'] ?? 'INVALID',
-						'register_url' => 'https://registry.apeiron.io/register',
+						'register_url' => 'https://www.apeiron-registry.com/register',
 					] );
 					exit;
 				}
@@ -107,7 +107,7 @@ class Apeiron_Frontend {
 				echo wp_json_encode( [
 					'error'        => 'Invalid agent credentials',
 					'code'         => $result['code'] ?? 'INVALID',
-					'register_url' => 'https://registry.apeiron.io/register',
+					'register_url' => 'https://www.apeiron-registry.com/register',
 				] );
 				exit;
 			}
@@ -120,13 +120,13 @@ class Apeiron_Frontend {
 				echo wp_json_encode( [
 					'error'            => 'Agent identification required',
 					'protocol'         => 'Apeiron Registry v1.0',
-					'register_url'     => 'https://registry.apeiron.io/register',
+					'register_url'     => 'https://www.apeiron-registry.com/register',
 					'standard_headers' => [
 						'X-Apeiron-Agent-ID' => 'your_agent_id',
 						'X-Apeiron-API-Key'  => 'your_api_key',
 						'X-Apeiron-Purpose'  => 'training|inference|search',
 					],
-					'message' => 'Register your AI agent at registry.apeiron.io to access this content legally',
+					'message' => 'Register your AI agent at www.apeiron-registry.com to access this content legally',
 				] );
 				exit;
 			}
@@ -186,7 +186,7 @@ class Apeiron_Frontend {
 	// ── Registry API calls ──────────────────────────────────────────────────
 
 	/**
-	 * Chiama registry.apeiron.io/api/registry/verify
+	 * Chiama www.apeiron-registry.com/api/registry/verify
 	 *
 	 * FIX 2: HTTPS enforced (registry URL must be https://)
 	 * FIX 4: Fail-open — if API unreachable within 2s, allow access
@@ -194,7 +194,7 @@ class Apeiron_Frontend {
 	 * FIX 3: Email debounce — sends X-Debounce-Key header
 	 */
 	private function verify_with_registry( string $agent_id, string $api_key, int $post_id, string $user_agent ): array {
-		$registry_url    = get_option( 'apeiron_registry_url', 'https://registry.apeiron.io/api/registry/verify' );
+		$registry_url    = get_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
 		$publisher_email = get_option( 'apeiron_registry_publisher_email', '' );
 
 		// FIX 2: Enforce HTTPS — refuse to send API key over plaintext
@@ -259,7 +259,7 @@ class Apeiron_Frontend {
 	 * Used on cache-hit to still record the access without calling /verify.
 	 */
 	private function log_verified_access_async( string $agent_id, string $api_key, int $post_id, string $user_agent, bool $notify ): void {
-		$registry_url    = get_option( 'apeiron_registry_url', 'https://registry.apeiron.io/api/registry/verify' );
+		$registry_url    = get_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
 		$publisher_email = get_option( 'apeiron_registry_publisher_email', '' );
 
 		wp_remote_post( $registry_url, [
@@ -284,7 +284,7 @@ class Apeiron_Frontend {
 	 * Non-bloccante. Alimenta il counter pubblico sulla landing page.
 	 */
 	private function log_anonymous_bot( int $post_id, string $user_agent ): void {
-		$registry_url    = get_option( 'apeiron_registry_url', 'https://registry.apeiron.io/api/registry/verify' );
+		$registry_url    = get_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
 		$publisher_email = get_option( 'apeiron_registry_publisher_email', '' );
 
 		wp_remote_post( $registry_url, [
