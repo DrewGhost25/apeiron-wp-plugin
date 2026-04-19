@@ -16,9 +16,11 @@ class Apeiron_Admin {
 	}
 
 	public function register_menu(): void {
-		add_options_page(
+		// Registra come sottomenu del menu Apeiron (non sotto Settings)
+		add_submenu_page(
+			'apeiron-dashboard',
 			__( 'Apeiron Settings', 'apeiron-ai-bot-tracker' ),
-			__( 'Apeiron', 'apeiron-ai-bot-tracker' ),
+			__( 'Settings', 'apeiron-ai-bot-tracker' ),
 			'manage_options',
 			'apeiron-settings',
 			[ $this, 'render_settings_page' ]
@@ -460,7 +462,7 @@ class Apeiron_Admin {
 		$allowed = [
 			'post.php',
 			'post-new.php',
-			'settings_page_apeiron-settings',
+			'apeiron_page_apeiron-settings',
 			'toplevel_page_apeiron-dashboard',
 			'apeiron_page_apeiron-bot-activity',
 		];

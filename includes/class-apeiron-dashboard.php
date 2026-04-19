@@ -52,15 +52,7 @@ class Apeiron_Dashboard {
 			[ $this, 'render_activity_page' ]
 		);
 
-		// Sottomenu: Settings (punta alla pagina registrata da Apeiron_Admin)
-		add_submenu_page(
-			'apeiron-dashboard',
-			__( 'Settings', 'apeiron-ai-bot-tracker' ),
-			__( 'Settings', 'apeiron-ai-bot-tracker' ),
-			'manage_options',
-			'apeiron-settings',
-			'' // callback vuota — WP usa quella registrata da add_options_page
-		);
+		// Settings è registrato da Apeiron_Admin::register_menu()
 	}
 
 	// ── Dashboard principale ─────────────────────────────────────────────────
