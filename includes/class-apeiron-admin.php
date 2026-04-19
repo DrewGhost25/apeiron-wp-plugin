@@ -7,7 +7,7 @@ defined( 'ABSPATH' ) || exit;
 class Apeiron_Admin {
 
 	public function init(): void {
-		add_action( 'admin_menu',            [ $this, 'register_menu' ] );
+		add_action( 'admin_menu',            [ $this, 'register_menu' ], 20 );
 		add_action( 'admin_init',            [ $this, 'register_settings' ] );
 		add_action( 'add_meta_boxes',        [ $this, 'add_meta_box' ] );
 		add_action( 'save_post',             [ $this, 'save_meta' ], 10, 2 );
