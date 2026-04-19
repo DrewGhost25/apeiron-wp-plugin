@@ -212,7 +212,7 @@ class Apeiron_Frontend {
 	 */
 	private function verify_with_registry( string $agent_id, string $api_key, int $post_id, string $user_agent ): array {
 		$registry_url    = get_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
-		$publisher_email = get_option( 'apeiron_registry_publisher_email', '' );
+		$publisher_email = get_option( 'apeiron_publisher_email', '' );
 
 		// FIX 2: Enforce HTTPS — refuse to send API key over plaintext
 		if ( strpos( $registry_url, 'https://' ) !== 0 ) {
@@ -277,7 +277,7 @@ class Apeiron_Frontend {
 	 */
 	private function log_verified_access_async( string $agent_id, string $api_key, int $post_id, string $user_agent, bool $notify ): void {
 		$registry_url    = get_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
-		$publisher_email = get_option( 'apeiron_registry_publisher_email', '' );
+		$publisher_email = get_option( 'apeiron_publisher_email', '' );
 
 		wp_remote_post( $registry_url, [
 			'timeout'  => 1,
@@ -302,7 +302,7 @@ class Apeiron_Frontend {
 	 */
 	private function log_anonymous_bot( int $post_id, string $user_agent ): void {
 		$registry_url    = get_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
-		$publisher_email = get_option( 'apeiron_registry_publisher_email', '' );
+		$publisher_email = get_option( 'apeiron_publisher_email', '' );
 
 		wp_remote_post( $registry_url, [
 			'timeout'  => 1,

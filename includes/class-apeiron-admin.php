@@ -108,11 +108,6 @@ class Apeiron_Admin {
 		}
 
 		// ── Registry settings ─────────────────────────────────────────────────
-		$registry_fields = [
-			'registry_url'             => __( 'Registry API URL', 'apeiron-ai-bot-tracker' ),
-			'registry_publisher_email' => __( 'Publisher Email (for notifications)', 'apeiron-ai-bot-tracker' ),
-		];
-
 		add_settings_section(
 			'apeiron_registry',
 			__( 'Apeiron Registry', 'apeiron-ai-bot-tracker' ),
@@ -120,19 +115,17 @@ class Apeiron_Admin {
 			'apeiron-settings'
 		);
 
-		foreach ( $registry_fields as $key => $label ) {
-			register_setting( 'apeiron_settings', "apeiron_{$key}", [
-				'sanitize_callback' => 'sanitize_text_field',
-			] );
-			add_settings_field(
-				"apeiron_{$key}",
-				$label,
-				[ $this, 'render_text_field' ],
-				'apeiron-settings',
-				'apeiron_registry',
-				[ 'key' => $key ]
-			);
-		}
+		register_setting( 'apeiron_settings', 'apeiron_registry_url', [
+			'sanitize_callback' => 'sanitize_text_field',
+		] );
+		add_settings_field(
+			'apeiron_registry_url',
+			__( 'Registry API URL', 'apeiron-ai-bot-tracker' ),
+			[ $this, 'render_text_field' ],
+			'apeiron-settings',
+			'apeiron_registry',
+			[ 'key' => 'registry_url' ]
+		);
 	}
 
 	public function render_show_branding_field(): void {
@@ -234,30 +227,26 @@ class Apeiron_Admin {
 			</div>
 
 			<div class="apeiron-fee-notice" style="margin-top:20px">
-				<strong><?php esc_html_e( 'Interceptable AI Bots', 'apeiron-ai-bot-tracker' ); ?></strong>
-				<p style="margin:4px 0 8px;color:#888;font-size:13px"><?php esc_html_e( 'These User-Agent patterns are automatically detected and subject to the x402 paywall in AI Only and Full modes.', 'apeiron-ai-bot-tracker' ); ?></p>
+				<strong><?php esc_html_e( 'Tracked AI Bots', 'apeiron-ai-bot-tracker' ); ?></strong>
+				<p style="margin:4px 0 8px;color:#888;font-size:13px"><?php esc_html_e( 'These User-Agent patterns are automatically detected, logged, and optionally blocked or monetized.', 'apeiron-ai-bot-tracker' ); ?></p>
 				<table class="apeiron-fee-table">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'Bot / User-Agent', 'apeiron-ai-bot-tracker' ); ?></th>
+							<th><?php esc_html_e( 'User-Agent', 'apeiron-ai-bot-tracker' ); ?></th>
+							<th><?php esc_html_e( 'Name', 'apeiron-ai-bot-tracker' ); ?></th>
 							<th><?php esc_html_e( 'Company', 'apeiron-ai-bot-tracker' ); ?></th>
+							<th><?php esc_html_e( 'Purpose', 'apeiron-ai-bot-tracker' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr><td>GPTBot</td><td>OpenAI</td></tr>
-						<tr><td>ChatGPT-User</td><td>OpenAI</td></tr>
-						<tr><td>ClaudeBot</td><td>Anthropic</td></tr>
-						<tr><td>Claude-Web</td><td>Anthropic</td></tr>
-						<tr><td>Google-Extended</td><td>Google</td></tr>
-						<tr><td>Googlebot</td><td>Google</td></tr>
-						<tr><td>PerplexityBot</td><td>Perplexity AI</td></tr>
-						<tr><td>YouBot</td><td>You.com</td></tr>
-						<tr><td>Diffbot</td><td>Diffbot</td></tr>
-						<tr><td>CCBot</td><td>Common Crawl</td></tr>
-						<tr><td>FacebookBot</td><td>Meta</td></tr>
-						<tr><td>Applebot</td><td>Apple</td></tr>
-						<tr><td>BingBot</td><td>Microsoft</td></tr>
-						<tr><td>X402-Agent</td><td>x402 Protocol</td></tr>
+						<?php foreach ( Apeiron_Detector::KNOWN_BOTS as $ua => $info ) : ?>
+							<tr>
+								<td><code><?php echo esc_html( $ua ); ?></code></td>
+								<td><?php echo esc_html( $info['name'] ); ?></td>
+								<td><?php echo esc_html( $info['company'] ); ?></td>
+								<td><?php echo esc_html( $info['purpose'] ); ?></td>
+							</tr>
+						<?php endforeach; ?>
 					</tbody>
 				</table>
 			</div>
