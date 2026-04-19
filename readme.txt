@@ -1,192 +1,147 @@
-=== Apeiron — Web3 Content Paywall ===
+=== Apeiron — AI Bot Tracker ===
 Contributors:      drewghost25
-Tags:              paywall, web3, crypto, usdc, blockchain, monetization, base, metamask
-Requires at least: 6.0
-Tested up to:      6.9
-Requires PHP:      8.0
-Stable tag:        1.2.0
+Tags:              ai, bots, tracker, chatgpt, claude, crawler, analytics
+Requires at least: 5.8
+Tested up to:      6.7
+Stable tag:        2.0.0
+Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-Web3 content paywall for WordPress. Charge readers in USDC on Base blockchain. AI agents pay automatically via the x402 protocol.
+Know which AI bots read your content. ChatGPT, Claude, Gemini, Perplexity — detect them all, log every visit, and optionally block or monetize access.
 
 == Description ==
 
-**Apeiron** adds a crypto paywall to your WordPress articles. Readers pay once in USDC (a 1:1 USD stablecoin) and get permanent access verified directly on Base Mainnet — no subscriptions, no login walls, no intermediaries.
+**Apeiron AI Bot Tracker** shows you exactly which AI bots are visiting your WordPress site — automatically, from the moment you activate it.
 
-Access is verified **on-chain**: once a wallet pays, it has permanent access forever. No backend database, no cookies, no trust required.
+Every week, bots from OpenAI, Anthropic, Google, Perplexity and more visit millions of websites to collect training data or power real-time answers. Most publishers have no idea this is happening.
 
-AI agents (LLM scrapers, RAG pipelines, automated readers) are detected via User-Agent and priced separately — so your content works for the machine economy too.
+**Apeiron AI Bot Tracker shows you the truth.**
 
-= Protection Modes =
+= Detected bots (21+) =
 
-Each article can be set to one of three modes from the Apeiron Paywall meta box:
-
-* **Disabled** — No protection, free for everyone
-* **AI Only** — Humans read free, AI bots receive HTTP 402 with payment instructions
-* **Full** — Paywall for everyone (preview + USDC payment flow)
+OpenAI (GPTBot, ChatGPT-User, OAI-SearchBot), Anthropic (ClaudeBot, Claude-Web), Google (Google-Extended, GoogleOther), Perplexity, Meta (FacebookBot, Meta-ExternalAgent), Microsoft (Bingbot), Apple (Applebot, Applebot-Extended), Amazon (Amazonbot), TikTok/ByteDance (ByteSpider), Common Crawl (CCBot), Diffbot, You.com, Cohere, Mistral, and more.
 
 = Features =
 
-* Three protection modes per article: Disabled, AI Only, Full
-* USDC payments on Base Mainnet (near-zero gas fees, 1:1 with USD)
-* Separate pricing for human readers and AI agents
-* On-chain access verification — no database, no sessions
-* Configurable preview paragraphs before the paywall (1–20, default: 4)
-* Analytics dashboard — revenue, human readers and AI bots per article
-* Publisher bypass — the article owner sees full content for free
+* Detect 21+ AI bots automatically — zero configuration required
+* Dashboard with bot statistics: top bots, most-scanned articles, recent activity
+* Per-bot settings: Allow, Block, or Require Apeiron Registry ID
+* Apeiron Registry integration — identify registered AI agents by company name
+* Weekly email report every Monday with bot activity summary
+* USDC paywall per article (optional, Base Mainnet) — charge AI bots and/or human readers
 * x402 protocol endpoint for AI agents
-* Works with any public Base RPC
+* Stats API for integration with Apeiron Registry dashboard
 
-= Per-Article Settings =
+= Protection Modes (per article) =
 
-Each protected article has an **Apeiron Paywall** meta box with:
+* **Disabled** — No protection, DETECT mode still logs bots
+* **AI Only** — Humans read free, AI bots receive HTTP 402 with USDC payment instructions
+* **Full** — USDC paywall for everyone (preview + payment flow)
+* **Registry Log** — Allow all, log verified Apeiron Registry agents
+* **Registry Block** — Require Apeiron Registry ID, block anonymous bots
 
-* **Protection Mode** — Disabled / AI Only / Full
-* **AI agent price** — amount in USDC (default: $1.00)
-* **Human reader price** — amount in USDC (default: $0.10, Full mode only)
-* **Preview paragraphs** — how many paragraphs to show before the paywall (Full mode only)
-* **Registration status** — shows whether the content is registered on-chain
-* **Register on blockchain** — sends the registration transaction via MetaMask
-
-= Smart Contract =
-
-The plugin integrates with the X402GatewayV3 smart contract on Base Mainnet:
-`0x6De5e0273428B14d88a690b200870f17888b0d77`
-
-= Fee Structure =
-
-Platform fees are applied automatically by the smart contract based on transaction size:
-
-* Up to $10 USDC: 10% platform fee (publisher receives 90%)
-* $10 – $100 USDC: 5% platform fee (publisher receives 95%)
-* Above $100 USDC: 2% platform fee (publisher receives 98%)
+> **Important note on Full mode protection:** In Full mode, the complete article HTML is present in the page source (hidden via CSS) to preserve SEO and avoid layout issues. The security layer is USDC on-chain verification. For server-side content protection, use Registry Block mode combined with Apeiron Registry.
 
 = Requirements =
 
-* WordPress 6.0+
-* PHP 8.0+
-* MetaMask or any EIP-1193 compatible browser wallet
-* A publisher wallet address on Base Mainnet
-* USDC on Base (for readers to pay)
+* WordPress 5.8+
+* PHP 7.4+
+* For paywall features: MetaMask or any EIP-1193 compatible browser wallet + USDC on Base Mainnet
 
 == Installation ==
 
-1. Upload the `apeiron-plugin` folder to `/wp-content/plugins/`
-2. Activate the plugin from the **Plugins** screen in WordPress
-3. Go to **Settings → Apeiron** and configure:
-   - Your **Publisher Wallet Address** (where you receive payments)
-   - Gateway Contract Address (pre-filled)
-   - USDC Token Address (pre-filled)
-   - Base RPC URL (pre-filled with `https://mainnet.base.org`)
-4. Edit any post and open the **Apeiron Paywall** meta box in the sidebar
-5. Select a **Protection Mode**, set the price, then click **Register on blockchain**
-6. MetaMask will open — confirm the `registerContent` transaction
-
-> **Important:** Always publish the article before registering on-chain. The content ID is derived from the public URL of the post.
+1. Upload the plugin folder to `/wp-content/plugins/`
+2. Activate from the **Plugins** screen
+3. Bot detection starts immediately — visit **Apeiron → Dashboard** to see your first data
+4. Optional: Go to **Settings → Apeiron** to configure publisher email, registry API URL, and paywall settings
+5. Optional: Edit any post and open the **Apeiron Paywall** meta box to enable per-article protection
 
 == Frequently Asked Questions ==
 
+= Does this slow down my site? =
+No. Detection is a single string comparison on the User-Agent header. The performance impact is negligible.
+
+= Will this block Google Search or Bing Search bots? =
+No, by default. The plugin logs all known AI bots but only blocks bots that you explicitly set to "Block" in the per-bot settings.
+
+= Is the content really protected in Full mode? =
+In Full mode, the complete article text is present in the page DOM (hidden via CSS) to avoid SEO and performance issues. Real protection uses on-chain USDC verification — only wallets that have paid can prove access. For full server-side protection, use Registry Block mode.
+
+= What is Apeiron Registry? =
+An open protocol for AI agents to identify themselves with a verified company name, VAT number, and declared purpose. Publishers can require registry identification to grant content access.
+
 = Do readers need a crypto wallet? =
-
-Yes, readers must have MetaMask (or any EIP-1193 compatible wallet) installed in their browser. MetaMask is free and available at [metamask.io](https://metamask.io).
-
-= Which cryptocurrencies are accepted? =
-
-Only USDC on Base Mainnet. USDC is a stablecoin pegged 1:1 to the US Dollar, issued by Circle.
-
-= How do readers get USDC on Base? =
-
-Readers can buy USDC directly on [Coinbase](https://coinbase.com) and transfer it to Base, or use a bridge like [bridge.base.org](https://bridge.base.org).
-
-= Do readers pay every time they visit? =
-
-No. Access is permanent: once a wallet pays, it is authorized on-chain forever. No subscriptions or renewals needed.
-
-= What happens if a reader loses access to their wallet? =
-
-Access is tied to the wallet address. If a reader loses their wallet, they would need to pay again with a new address.
-
-= Is the content really protected server-side? =
-
-In Full mode, the complete article text is included in the DOM (hidden via CSS) to avoid SEO and performance issues. The real security layer is on-chain verification: only wallets that have paid can prove access. For complete server-side protection, consider additional solutions.
-
-In AI Only mode, bot requests are intercepted at the server level before the page is rendered and receive HTTP 402 with payment instructions.
-
-= What AI bots are detected? =
-
-GPTBot, ChatGPT-User, ClaudeBot, Claude-Web, Google-Extended, Googlebot, PerplexityBot, YouBot, Diffbot, CCBot, FacebookBot, Applebot, BingBot, and generic bot/crawler/spider patterns.
-
-= Do I need to install anything on the server? =
-
-No. The plugin uses the public Base Mainnet RPC for server-side access checks, and loads ethers.js via CDN for the frontend. No dependencies to install.
+Only for the optional USDC paywall. Bot detection and logging work without any wallet or blockchain interaction.
 
 = What is the x402 protocol? =
+A machine-readable payment protocol using HTTP 402 (Payment Required). When a bot hits a paywalled article, it receives JSON instructions to pay in USDC and retry.
 
-x402 is a machine-readable payment protocol built on HTTP 402 (Payment Required). When an AI agent hits a protected endpoint without payment, the plugin returns a structured JSON response with payment instructions. The agent approves USDC, calls the smart contract, then retries the request with its wallet address — and receives the content.
+= How does the Stats API work? =
+The plugin exposes a REST endpoint `GET /wp-json/apeiron/v1/bot-stats` authenticated with a Stats API Key (shown in Settings → Apeiron). This allows Apeiron Registry to display your publisher stats in its dashboard.
 
 == Screenshots ==
 
-1. Apeiron Paywall meta box in the post editor — select mode and set prices
-2. Global settings page — configure wallet address and contract
-3. Frontend paywall card — dark theme with MetaMask button
-4. Payment flow — Connect → Approve → Read
-5. Analytics dashboard — revenue, human readers and AI bots per article
+1. Dashboard — bot statistics, top bots, recent activity
+2. Per-bot settings — Allow, Block, or Require Registry ID
+3. Settings page — email, registry integration, paywall config
+4. Weekly email report
+5. USDC paywall (optional, Full mode)
 
 == External Services ==
 
 This plugin connects to the following external services:
 
-**1. Base Mainnet RPC (`https://mainnet.base.org`)**
-Used by the WordPress server to verify on-chain access (`eth_call` via JSON-RPC).
-Also used by the browser to read analytics events and send payment transactions.
+**1. Apeiron Registry API (`https://apeiron-registry.com/api/registry/verify`)**
+Used to verify the identity of AI agents that present an Apeiron Registry ID when accessing your content. Only called when an AI agent sends `X-Apeiron-Agent-ID` and `X-Apeiron-API-Key` headers AND the article is set to "Registry Log" or "Registry Block" mode.
+Data sent: agent ID, API key, content URL, content title, publisher email (if configured), visitor IP address.
+This feature is optional and inactive unless you configure the Registry API URL in settings.
+[Apeiron Registry Terms of Service](https://apeiron-registry.com/terms) · [Privacy Policy](https://apeiron-registry.com/privacy)
+
+**2. Base Mainnet RPC (`https://mainnet.base.org`)**
+Used by the WordPress server to verify on-chain USDC payments (`eth_call` via JSON-RPC). Only called when a visitor requests a paywalled article and provides a wallet address.
+Also used by the browser for wallet interactions when the USDC paywall is active.
 This is a public, unauthenticated endpoint operated by Coinbase / Base.
-[Base Terms of Service](https://base.org/terms-of-service)
+No personal data is sent — only wallet addresses and smart contract call data.
+[Base Terms of Service](https://base.org/terms-of-service) · [Coinbase Privacy Policy](https://www.coinbase.com/legal/privacy)
 
-**2. Apeiron Smart Contract on Base Mainnet**
+**3. Apeiron Smart Contract on Base Mainnet**
 Contract address: `0x6De5e0273428B14d88a690b200870f17888b0d77`
-All payments (USDC) flow through this contract. It handles access grants and fee distribution.
-Interaction only occurs when the publisher registers content or when a reader pays.
-[Basescan](https://basescan.org/address/0x6De5e0273428B14d88a690b200870f17888b0d77)
+All USDC payments flow through this smart contract. Interactions only occur when the publisher registers content on-chain or when a reader/bot pays for access.
+[View on Basescan](https://basescan.org/address/0x6De5e0273428B14d88a690b200870f17888b0d77)
 
-**3. ethers.js v6.13.4 (bundled locally)**
-Included in the plugin package (`assets/js/ethers.umd.min.js`). Used on article pages (Full mode) and admin pages to handle wallet connections and transaction signing. No external CDN requests are made.
-License: MIT. Source: [ethers.js on GitHub](https://github.com/ethers-io/ethers.js)
-
-No data is sent to Apeiron servers. All blockchain interactions happen directly between the user's browser and the Base Mainnet RPC.
+**4. ethers.js v6 (bundled locally)**
+JavaScript library included in the plugin package at `assets/js/ethers.umd.min.js`. Used on protected article pages and admin screens to handle wallet connections and transaction signing. **No CDN requests are made** — the file is served directly from your WordPress installation.
+License: MIT · [Source on GitHub](https://github.com/ethers-io/ethers.js)
+Note: ethers.js internally contains fallback URLs for Etherscan and other block explorers (e.g., `api.basescan.org`) for network detection purposes. These URLs are only contacted if you use ethers.js provider features that explicitly request blockchain data — the plugin does not trigger these calls automatically.
 
 == Changelog ==
 
+= 2.0.0 =
+* Complete rebranding: Apeiron — AI Bot Tracker
+* DETECT mode: automatic bot detection and logging on all articles (no configuration needed)
+* New database tables: bot_log (per-access log) and bot_settings (per-bot actions)
+* Bot database expanded to 21 known AI bots
+* New dashboard with DB-driven statistics (no wallet connection required)
+* Bot Activity page with filterable access log
+* Per-bot settings: Allow, Block, Require Registry ID
+* Weekly email report (every Monday)
+* Stats API endpoint for Apeiron Registry integration
+* Fix: "Powered by" link now opt-in via settings (Guideline 10 compliance)
+* Fix: ethers.js documentation clarified (bundled, not CDN)
+* Requires PHP 7.4+ (reduced from 8.0)
+* Requires WordPress 5.8+ (reduced from 6.0)
+
 = 1.2.0 =
 * Three protection modes per article: Disabled, AI Only, Full
-* AI Only mode: humans read free, bots intercepted at server level with HTTP 402
-* x402 REST endpoint for AI agents (`/wp-json/apeiron/v1/content/<post_id>`)
-* Expanded bot detection: GPTBot, ChatGPT-User, ClaudeBot, Claude-Web, Google-Extended, Googlebot, PerplexityBot, YouBot, Diffbot, CCBot, FacebookBot, Applebot, BingBot
-* Analytics dashboard with on-chain revenue and access counts per article
-* Publisher wallet bypass — article owner sees full content for free
-* All user-facing strings translated to English
-* Fixed: inline script moved to wp_add_inline_script()
-* Fixed: Stable tag and version number aligned
-
-= 1.1.0 =
-* Configurable preview paragraphs per article (1–20, default 4)
-* Fixed ABI compatibility with X402GatewayV3
-* contentId computed client-side with ethers.keccak256
-* Fixed ethers.js loading on admin pages
-* Fixed hasAccess() selector: 4a0f4a07 → 24ea5704
+* AI Only mode: humans read free, bots intercepted with HTTP 402
+* Registry Log and Registry Block modes with Apeiron Registry integration
+* Analytics dashboard with on-chain data
 
 = 1.0.0 =
-* Initial release
-* USDC paywall on Base Mainnet
-* On-chain access verification via WordPress REST API
-* Content registration with MetaMask from admin
-* Separate pricing for human and AI readers
-* Dark mode paywall template
+* Initial release — USDC paywall on Base Mainnet
 
 == Upgrade Notice ==
 
-= 1.2.0 =
-New protection modes (Disabled, AI Only, Full) replace the old on/off checkbox. Existing protected articles are automatically migrated to Full mode.
-
-= 1.0.0 =
-First stable version. Configure your Publisher Wallet Address in Settings → Apeiron after activation.
+= 2.0.0 =
+Major update. New database tables are created automatically on activation. All existing settings and per-article configurations are preserved.

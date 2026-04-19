@@ -49,6 +49,23 @@ class Apeiron_Frontend {
 		$mode       = $this->get_mode( $post_id );
 		$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
+		// ── DETECT mode: always log every AI bot hit ──────────────────────────
+		$detector = new Apeiron_Detector();
+		$bot_info = $detector->detect( $user_agent );
+		if ( $bot_info['detected'] ) {
+			$agent_id_header = $_SERVER['HTTP_X_APEIRON_AGENT_ID'] ?? '';
+			$logger          = new Apeiron_Logger();
+			$logger->log(
+				$bot_info,
+				$post_id,
+				$user_agent,
+				$_SERVER['REMOTE_ADDR'] ?? '',
+				$agent_id_header,
+				false,
+				'logged'
+			);
+		}
+
 		// ── Registry modes ───────────────────────────────────────────────────
 		if ( in_array( $mode, [ 'registry_log', 'registry_block' ], true ) ) {
 			if ( ! preg_match( self::KNOWN_BOTS, $user_agent ) ) {
@@ -353,6 +370,7 @@ class Apeiron_Frontend {
 		$content_id      = get_post_meta( $post_id, '_apeiron_content_id', true )  ?: '';
 		$gateway_address = get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY );
 		$usdc_address    = get_option( 'apeiron_usdc_address',    APEIRON_DEFAULT_USDC );
+		$show_branding   = (bool) get_option( 'apeiron_show_branding', '1' );
 		ob_start();
 		include APEIRON_PATH . 'templates/paywall-template.php';
 		return ob_get_clean();
@@ -396,15 +414,15 @@ class Apeiron_Frontend {
 			'postUrl'        => get_permalink( $post_id ),
 			'publisherWallet'=> strtolower( get_option( 'apeiron_publisher_wallet', '' ) ),
 			'i18n'           => [
-				'connecting'  => __( 'Connecting…', 'apeiron-web3-content-paywall' ),
-				'checking'    => __( 'Checking access…', 'apeiron-web3-content-paywall' ),
-				'approving'   => __( 'Approve USDC in MetaMask…', 'apeiron-web3-content-paywall' ),
-				'paying'      => __( 'Confirm payment in MetaMask…', 'apeiron-web3-content-paywall' ),
-				'unlocking'   => __( 'Unlocking…', 'apeiron-web3-content-paywall' ),
-				'noMetaMask'  => __( 'MetaMask not found. Install it at metamask.io', 'apeiron-web3-content-paywall' ),
-				'wrongChain'  => __( 'Switch to Base Mainnet in MetaMask (Chain ID 8453).', 'apeiron-web3-content-paywall' ),
-				'error'       => __( 'Error: ', 'apeiron-web3-content-paywall' ),
-				'alreadyPaid' => __( 'Access found — loading…', 'apeiron-web3-content-paywall' ),
+				'connecting'  => __( 'Connecting…', 'apeiron-ai-bot-tracker' ),
+				'checking'    => __( 'Checking access…', 'apeiron-ai-bot-tracker' ),
+				'approving'   => __( 'Approve USDC in MetaMask…', 'apeiron-ai-bot-tracker' ),
+				'paying'      => __( 'Confirm payment in MetaMask…', 'apeiron-ai-bot-tracker' ),
+				'unlocking'   => __( 'Unlocking…', 'apeiron-ai-bot-tracker' ),
+				'noMetaMask'  => __( 'MetaMask not found. Install it at metamask.io', 'apeiron-ai-bot-tracker' ),
+				'wrongChain'  => __( 'Switch to Base Mainnet in MetaMask (Chain ID 8453).', 'apeiron-ai-bot-tracker' ),
+				'error'       => __( 'Error: ', 'apeiron-ai-bot-tracker' ),
+				'alreadyPaid' => __( 'Access found — loading…', 'apeiron-ai-bot-tracker' ),
 			],
 		] );
 	}

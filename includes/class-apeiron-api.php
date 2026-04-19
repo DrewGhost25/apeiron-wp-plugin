@@ -23,7 +23,8 @@ class Apeiron_Api {
 
 	public function register_routes(): void {
 
-		// ── Endpoint verifica (usato dal JS frontend) ────────────────────────
+		// ── Endpoint verifica (usato dal JS frontend) ─────────────────────────
+		// Intenzionalmente pubblico: dati on-chain pubblici, nessun dato sensibile.
 		register_rest_route( 'apeiron/v1', '/verify', [
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => [ $this, 'verify_access' ],
@@ -42,7 +43,8 @@ class Apeiron_Api {
 			],
 		] );
 
-		// ── Endpoint x402 per agenti AI ──────────────────────────────────────
+		// ── Endpoint x402 per agenti AI ───────────────────────────────────────
+		// Intenzionalmente pubblico: protocollo x402, dati on-chain pubblici.
 		register_rest_route( 'apeiron/v1', '/content/(?P<post_id>\d+)', [
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => [ $this, 'x402_content' ],
@@ -54,6 +56,41 @@ class Apeiron_Api {
 				],
 			],
 		] );
+
+		// ── Endpoint statistiche bot (autenticato con Stats API Key) ──────────
+		register_rest_route( 'apeiron/v1', '/bot-stats', [
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => [ $this, 'get_bot_stats' ],
+			'permission_callback' => [ $this, 'check_stats_key' ],
+		] );
+	}
+
+	/**
+	 * Verifica la Stats API Key dalla header o dal parametro GET.
+	 */
+	public function check_stats_key( WP_REST_Request $request ): bool {
+		$stored_key = get_option( 'apeiron_stats_api_key', '' );
+		if ( ! $stored_key ) {
+			return false;
+		}
+
+		$provided = $request->get_header( 'x_apeiron_stats_key' );
+		if ( ! $provided ) {
+			$provided = $request->get_param( 'key' );
+		}
+
+		return hash_equals( $stored_key, (string) $provided );
+	}
+
+	/**
+	 * GET /wp-json/apeiron/v1/bot-stats
+	 * Ritorna le statistiche dei bot per gli ultimi N giorni.
+	 */
+	public function get_bot_stats( WP_REST_Request $request ): WP_REST_Response {
+		$days  = (int) ( $request->get_param( 'days' ) ?: 7 );
+		$days  = max( 1, min( 365, $days ) );
+		$stats = ( new Apeiron_Logger() )->get_stats( $days );
+		return new WP_REST_Response( $stats, 200 );
 	}
 
 	// ── /verify ─────────────────────────────────────────────────────────────

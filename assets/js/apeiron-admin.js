@@ -1,7 +1,7 @@
 /**
  * Apeiron Admin — gestione registrazione on-chain dal pannello WordPress.
  *
- * Dipende da: ethers.js v6 (caricato via CDN)
+ * Dipende da: ethers.js v6 (bundled locally)
  * Dati iniettati da PHP: window.apeironAdmin
  */
 

@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 <div class="apeiron-fade" aria-hidden="true"></div>
 
 <!-- Paywall card -->
-<div id="apeiron-paywall" role="complementary" aria-label="<?php esc_attr_e( 'Paywall Apeiron', 'apeiron-web3-content-paywall' ); ?>">
+<div id="apeiron-paywall" role="complementary" aria-label="<?php esc_attr_e( 'Paywall Apeiron', 'apeiron-ai-bot-tracker' ); ?>">
 	<div class="apeiron-card">
 
 		<!-- Logo -->
@@ -30,13 +30,13 @@ defined( 'ABSPATH' ) || exit;
 
 		<!-- Titolo -->
 		<h3 class="apeiron-title">
-			<?php esc_html_e( 'Continue reading', 'apeiron-web3-content-paywall' ); ?>
+			<?php esc_html_e( 'Continue reading', 'apeiron-ai-bot-tracker' ); ?>
 		</h3>
 
 		<!-- Prezzo -->
 		<p class="apeiron-price">
 			$<?php echo esc_html( number_format( (float) $human_price, 2 ) ); ?> USDC
-			&middot; <?php esc_html_e( 'Permanent access', 'apeiron-web3-content-paywall' ); ?>
+			&middot; <?php esc_html_e( 'Permanent access', 'apeiron-ai-bot-tracker' ); ?>
 		</p>
 
 		<!-- Bottone Connect -->
@@ -48,7 +48,7 @@ defined( 'ABSPATH' ) || exit;
 				<path d="M32.958 1L19.47 10.824l2.52-5.944L32.958 1z" fill="#E2761B" stroke="#E2761B" stroke-linecap="round" stroke-linejoin="round"/>
 				<path d="M2.03 1l13.376 9.913-2.397-5.033L2.03 1zM28.15 23.533l-3.59 5.5 7.678 2.115 2.206-7.49-6.294-.125zM.577 23.658l2.194 7.49 7.678-2.115-3.59-5.5-6.282.125z" fill="#E4761B" stroke="#E4761B" stroke-linecap="round" stroke-linejoin="round"/>
 			</svg>
-			<?php esc_html_e( 'Connect Wallet', 'apeiron-web3-content-paywall' ); ?>
+			<?php esc_html_e( 'Connect Wallet', 'apeiron-ai-bot-tracker' ); ?>
 		</button>
 
 		<!-- Bottone Pay (visibile dopo connect) -->
@@ -58,7 +58,7 @@ defined( 'ABSPATH' ) || exit;
 			<?php
 			printf(
 				/* translators: %s: price in USDC */
-				esc_html__( 'Pay %s USDC', 'apeiron-web3-content-paywall' ),
+				esc_html__( 'Pay %s USDC', 'apeiron-ai-bot-tracker' ),
 				esc_html( number_format( (float) $human_price, 2 ) )
 			);
 			?>
@@ -68,31 +68,33 @@ defined( 'ABSPATH' ) || exit;
 		<p id="apeiron-status" class="apeiron-status" aria-live="polite"></p>
 
 		<!-- Steps -->
-		<ol class="apeiron-steps" aria-label="<?php esc_attr_e( 'Steps', 'apeiron-web3-content-paywall' ); ?>">
+		<ol class="apeiron-steps" aria-label="<?php esc_attr_e( 'Steps', 'apeiron-ai-bot-tracker' ); ?>">
 			<li>
 				<span class="step-num">1</span>
-				<?php esc_html_e( 'Connect', 'apeiron-web3-content-paywall' ); ?>
+				<?php esc_html_e( 'Connect', 'apeiron-ai-bot-tracker' ); ?>
 			</li>
 			<li>
 				<span class="step-num">2</span>
-				<?php esc_html_e( 'Approve', 'apeiron-web3-content-paywall' ); ?>
+				<?php esc_html_e( 'Approve', 'apeiron-ai-bot-tracker' ); ?>
 			</li>
 			<li>
 				<span class="step-num">3</span>
-				<?php esc_html_e( 'Read', 'apeiron-web3-content-paywall' ); ?>
+				<?php esc_html_e( 'Read', 'apeiron-ai-bot-tracker' ); ?>
 			</li>
 		</ol>
 
 		<!-- Footer -->
+		<?php if ( ! empty( $show_branding ) ) : ?>
 		<p class="apeiron-footer">
-			<?php esc_html_e( 'Powered by', 'apeiron-web3-content-paywall' ); ?>
-			<a href="https://apeiron-reader.com" target="_blank" rel="noopener noreferrer">Apeiron</a>
+			<?php esc_html_e( 'Secured by', 'apeiron-ai-bot-tracker' ); ?>
+			<a href="https://apeiron-registry.com" target="_blank" rel="noopener noreferrer">Apeiron</a>
 			&middot; Base Mainnet
 			&middot;
 			<a href="https://www.circle.com/usdc" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( 'What is USDC?', 'apeiron-web3-content-paywall' ); ?>
+				<?php esc_html_e( 'What is USDC?', 'apeiron-ai-bot-tracker' ); ?>
 			</a>
 		</p>
+		<?php endif; ?>
 
 	</div>
 </div>
