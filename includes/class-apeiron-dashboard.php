@@ -170,7 +170,7 @@ class Apeiron_Dashboard {
 				<table class="apeiron-dash-table">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'DATE', 'apeiron-ai-bot-tracker' ); ?></th>
+							<th><?php esc_html_e( 'DATE (UTC)', 'apeiron-ai-bot-tracker' ); ?></th>
 							<th><?php esc_html_e( 'BOT', 'apeiron-ai-bot-tracker' ); ?></th>
 							<th><?php esc_html_e( 'COMPANY', 'apeiron-ai-bot-tracker' ); ?></th>
 							<th><?php esc_html_e( 'CONTENT', 'apeiron-ai-bot-tracker' ); ?></th>
@@ -357,7 +357,7 @@ class Apeiron_Dashboard {
 				<table class="apeiron-dash-table">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'DATE', 'apeiron-ai-bot-tracker' ); ?></th>
+							<th><?php esc_html_e( 'DATE (UTC)', 'apeiron-ai-bot-tracker' ); ?></th>
 							<th><?php esc_html_e( 'BOT', 'apeiron-ai-bot-tracker' ); ?></th>
 							<th><?php esc_html_e( 'COMPANY', 'apeiron-ai-bot-tracker' ); ?></th>
 							<th><?php esc_html_e( 'PURPOSE', 'apeiron-ai-bot-tracker' ); ?></th>
