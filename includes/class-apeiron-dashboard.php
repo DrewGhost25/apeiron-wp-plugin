@@ -52,6 +52,16 @@ class Apeiron_Dashboard {
 			[ $this, 'render_activity_page' ]
 		);
 
+		// Sottomenu: Getting Started
+		add_submenu_page(
+			'apeiron-dashboard',
+			__( 'Getting Started', 'apeiron-ai-bot-tracker' ),
+			__( 'Getting Started', 'apeiron-ai-bot-tracker' ),
+			'edit_posts',
+			'apeiron-getting-started',
+			[ $this, 'render_guide_page' ]
+		);
+
 		// Settings è registrato da Apeiron_Admin::register_menu()
 	}
 
@@ -435,6 +445,96 @@ class Apeiron_Dashboard {
 			];
 		}
 		return $articles;
+	}
+
+	// ── Getting Started guide ────────────────────────────────────────────────
+
+	public function render_guide_page(): void {
+		if ( ! current_user_can( 'edit_posts' ) ) return;
+		$settings_url  = admin_url( 'admin.php?page=apeiron-settings' );
+		$new_post_url  = admin_url( 'post-new.php' );
+		$activity_url  = admin_url( 'admin.php?page=apeiron-bot-activity' );
+		?>
+		<div class="wrap apeiron-dashboard-wrap">
+			<h1 style="margin-bottom:4px"><?php esc_html_e( 'Getting Started', 'apeiron-ai-bot-tracker' ); ?></h1>
+			<p style="color:#888;margin-bottom:28px"><?php esc_html_e( 'Follow these steps to start tracking AI bots on your content.', 'apeiron-ai-bot-tracker' ); ?></p>
+
+			<?php
+			$steps = [
+				[
+					'n'     => '01',
+					'title' => 'Configure your settings',
+					'body'  => sprintf(
+						'Go to <a href="%s">Settings</a> and fill in: <strong>Publisher Email</strong> (for weekly bot reports) and, if you want to monetize with USDC, your <strong>Publisher Wallet Address</strong>. Everything else is pre-filled.',
+						esc_url( $settings_url )
+					),
+				],
+				[
+					'n'     => '02',
+					'title' => 'Write and publish your article',
+					'body'  => sprintf(
+						'<a href="%s">Create a new post</a> and publish it normally. <strong>The article must be published before configuring Apeiron</strong> — the content ID is derived from the public URL.',
+						esc_url( $new_post_url )
+					),
+				],
+				[
+					'n'     => '03',
+					'title' => 'Open the Apeiron box in the post editor',
+					'body'  => 'Go back to edit the published post. Find the <strong>Apeiron</strong> meta box in the right sidebar. Select a Protection Mode from the dropdown.',
+				],
+				[
+					'n'     => '04',
+					'title' => 'Choose a Protection Mode',
+					'body'  => '',
+					'modes' => [
+						[ 'icon' => '🔓', 'name' => 'Disabled',       'desc' => 'No tracking, no protection. The article is fully public and no bot data is collected for this post.' ],
+						[ 'icon' => '📋', 'name' => 'Registry Log',   'desc' => 'All bots can read freely. Bots that carry a valid <strong>Apeiron Registry ID</strong> are identified with their real company name and logged as verified. You receive an email notification on first access.' ],
+						[ 'icon' => '🛡',  'name' => 'Registry Block', 'desc' => 'Only bots with a valid Apeiron Registry ID can access the content. Unregistered bots receive a <code>401</code> response with instructions to register at apeiron-registry.com.' ],
+						[ 'icon' => '🤖', 'name' => 'AI Only',        'desc' => 'Human readers access content freely. AI bots are intercepted and must pay in <strong>USDC on Base</strong> via the x402 protocol before receiving the content.' ],
+						[ 'icon' => '🔒', 'name' => 'Full',           'desc' => 'Paywall for everyone — both human readers and AI bots must pay in USDC. A preview of the first paragraphs is shown before the paywall.' ],
+					],
+				],
+				[
+					'n'     => '05',
+					'title' => 'Monitor your bot activity',
+					'body'  => sprintf(
+						'Open the <a href="%s">Bot Activity</a> log to see every AI bot visit: date, company, content accessed, verification status and action taken. The Dashboard shows weekly summaries and top bots.',
+						esc_url( $activity_url )
+					),
+				],
+			];
+			?>
+
+			<div style="max-width:760px">
+				<?php foreach ( $steps as $step ) : ?>
+				<div style="display:flex;gap:20px;margin-bottom:28px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:6px;padding:20px 24px">
+					<div style="font-size:28px;font-weight:700;color:#8a6830;min-width:40px;line-height:1.2"><?php echo esc_html( $step['n'] ); ?></div>
+					<div style="flex:1">
+						<h3 style="margin:0 0 8px;font-size:15px;color:#e8e0d0"><?php echo esc_html( $step['title'] ); ?></h3>
+						<?php if ( $step['body'] ) : ?>
+							<p style="color:#9a9490;margin:0;line-height:1.6;font-size:13px"><?php echo wp_kses( $step['body'], [ 'a' => [ 'href' => [] ], 'strong' => [], 'code' => [] ] ); ?></p>
+						<?php endif; ?>
+						<?php if ( ! empty( $step['modes'] ) ) : ?>
+							<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+								<?php foreach ( $step['modes'] as $mode ) : ?>
+								<div style="background:#111;border-left:3px solid #8a6830;padding:10px 14px;border-radius:3px">
+									<strong style="color:#e8e0d0;font-size:13px"><?php echo esc_html( $mode['icon'] . ' ' . $mode['name'] ); ?></strong>
+									<p style="margin:4px 0 0;color:#9a9490;font-size:12px;line-height:1.5"><?php echo wp_kses( $mode['desc'], [ 'strong' => [], 'code' => [] ] ); ?></p>
+								</div>
+								<?php endforeach; ?>
+							</div>
+						<?php endif; ?>
+					</div>
+				</div>
+				<?php endforeach; ?>
+
+				<div style="background:#1a2a1a;border:1px solid #2a3a2a;border-left:3px solid #4caf50;border-radius:6px;padding:16px 20px;margin-top:8px">
+					<strong style="color:#4caf50;font-size:13px">💡 Tip — DETECT mode is always on</strong>
+					<p style="margin:6px 0 0;color:#9a9490;font-size:12px;line-height:1.5">Regardless of the per-article mode, every AI bot visit is automatically logged the moment the plugin is active. You start collecting data immediately — no configuration required.</p>
+				</div>
+			</div>
+		</div>
+		<?php
 	}
 
 	// ── Assets ───────────────────────────────────────────────────────────────
