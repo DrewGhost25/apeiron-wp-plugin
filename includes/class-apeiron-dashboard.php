@@ -71,7 +71,14 @@ class Apeiron_Dashboard {
 		$total_requests  = (int) $stats['total_requests'];
 		$unique_bots     = (int) $stats['unique_bots'];
 		$verified_agents = (int) $stats['verified_agents'];
-		$total_articles  = count( $articles );
+
+		global $wpdb;
+		$pages_scanned = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT request_url) FROM {$wpdb->prefix}apeiron_bot_log WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)",
+				7
+			)
+		);
 		?>
 		<div class="wrap apeiron-dashboard-wrap">
 
@@ -113,8 +120,8 @@ class Apeiron_Dashboard {
 					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'VERIFIED AGENTS', 'apeiron-ai-bot-tracker' ); ?></span>
 				</div>
 				<div class="apeiron-dash-kpi">
-					<span class="apeiron-dash-kpi-value apeiron-dash-kpi-muted"><?php echo esc_html( $total_articles ); ?></span>
-					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'PUBLISHED ARTICLES', 'apeiron-ai-bot-tracker' ); ?></span>
+					<span class="apeiron-dash-kpi-value apeiron-dash-kpi-muted"><?php echo esc_html( $pages_scanned ); ?></span>
+					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'PAGES SCANNED (7D)', 'apeiron-ai-bot-tracker' ); ?></span>
 				</div>
 			</div>
 
