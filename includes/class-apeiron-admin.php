@@ -61,33 +61,15 @@ class Apeiron_Admin {
 			'apeiron_tracker'
 		);
 
-		register_setting( 'apeiron_settings', 'apeiron_control_mode', [
-			'sanitize_callback' => 'absint',
-		] );
-		add_settings_field(
-			'apeiron_control_mode',
-			__( 'Control Mode', 'apeiron-ai-bot-tracker' ),
-			[ $this, 'render_control_mode_field' ],
-			'apeiron-settings',
-			'apeiron_tracker'
-		);
-
 		add_settings_field(
 			'apeiron_stats_api_key',
-			__( 'Stats API Key', 'apeiron-ai-bot-tracker' ),
+			__( 'External Stats API Key', 'apeiron-ai-bot-tracker' ),
 			[ $this, 'render_stats_api_key_field' ],
 			'apeiron-settings',
 			'apeiron_tracker'
 		);
 
 		// ── Blockchain settings ───────────────────────────────────────────────
-		$fields = [
-			'publisher_wallet' => __( 'Publisher Wallet Address', 'apeiron-ai-bot-tracker' ),
-			'gateway_address'  => __( 'Gateway Contract Address', 'apeiron-ai-bot-tracker' ),
-			'usdc_address'     => __( 'USDC Token Address', 'apeiron-ai-bot-tracker' ),
-			'rpc_url'          => __( 'Base RPC URL', 'apeiron-ai-bot-tracker' ),
-		];
-
 		add_settings_section(
 			'apeiron_main',
 			__( 'Blockchain Settings (x402)', 'apeiron-ai-bot-tracker' ),
@@ -95,14 +77,32 @@ class Apeiron_Admin {
 			'apeiron-settings'
 		);
 
-		foreach ( $fields as $key => $label ) {
+		// Publisher wallet — editable
+		register_setting( 'apeiron_settings', 'apeiron_publisher_wallet', [
+			'sanitize_callback' => 'sanitize_text_field',
+		] );
+		add_settings_field(
+			'apeiron_publisher_wallet',
+			__( 'Publisher Wallet Address', 'apeiron-ai-bot-tracker' ),
+			[ $this, 'render_wallet_field' ],
+			'apeiron-settings',
+			'apeiron_main'
+		);
+
+		// Fixed contract addresses — readonly
+		$readonly_fields = [
+			'gateway_address' => __( 'Gateway Contract Address', 'apeiron-ai-bot-tracker' ),
+			'usdc_address'    => __( 'USDC Token Address', 'apeiron-ai-bot-tracker' ),
+			'rpc_url'         => __( 'Base RPC URL', 'apeiron-ai-bot-tracker' ),
+		];
+		foreach ( $readonly_fields as $key => $label ) {
 			register_setting( 'apeiron_settings', "apeiron_{$key}", [
 				'sanitize_callback' => 'sanitize_text_field',
 			] );
 			add_settings_field(
 				"apeiron_{$key}",
 				$label,
-				[ $this, 'render_text_field' ],
+				[ $this, 'render_readonly_field' ],
 				'apeiron-settings',
 				'apeiron_main',
 				[ 'key' => $key ]
@@ -123,7 +123,7 @@ class Apeiron_Admin {
 		add_settings_field(
 			'apeiron_registry_url',
 			__( 'Registry API URL', 'apeiron-ai-bot-tracker' ),
-			[ $this, 'render_text_field' ],
+			[ $this, 'render_readonly_field' ],
 			'apeiron-settings',
 			'apeiron_registry',
 			[ 'key' => 'registry_url' ]
@@ -139,12 +139,25 @@ class Apeiron_Admin {
 		);
 	}
 
-	public function render_control_mode_field(): void {
-		$value = get_option( 'apeiron_control_mode', '0' );
+	public function render_wallet_field(): void {
+		$value = get_option( 'apeiron_publisher_wallet', '' );
 		printf(
-			'<label><input type="checkbox" name="apeiron_control_mode" value="1" %s /> %s</label>',
-			checked( 1, (int) $value, false ),
-			esc_html__( 'Enable CONTROL mode (block/require registry per bot)', 'apeiron-ai-bot-tracker' )
+			'<input type="text" name="apeiron_publisher_wallet" id="apeiron_publisher_wallet" value="%s" class="regular-text" placeholder="0x…" />
+			 <p class="description">%s</p>',
+			esc_attr( $value ),
+			esc_html__( 'Your public wallet address where USDC payments will be sent (e.g. 0x1A2b…). Never share your private key.', 'apeiron-ai-bot-tracker' )
+		);
+	}
+
+	public function render_readonly_field( array $args ): void {
+		$key   = $args['key'];
+		$value = get_option( "apeiron_{$key}", '' );
+		printf(
+			'<input type="text" id="apeiron_%s" value="%s" class="regular-text" readonly style="background:#f0f0f0;color:#555;cursor:default;font-family:monospace" />
+			 <p class="description">%s</p>',
+			esc_attr( $key ),
+			esc_attr( $value ),
+			esc_html__( 'Preset value — no need to change.', 'apeiron-ai-bot-tracker' )
 		);
 	}
 
@@ -174,9 +187,14 @@ class Apeiron_Admin {
 		if ( ! $default ) {
 			update_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
 		}
-		echo '<p style="color:#888;font-size:13px">'
+		echo '<p style="color:#555;font-size:13px;max-width:600px">'
 			. esc_html__( 'Enable per-article agent identification with Apeiron Registry. Publishers get email notifications when registered AI companies read their content.', 'apeiron-ai-bot-tracker' )
-			. ' <a href="https://www.apeiron-registry.com/protect" target="_blank">Learn more →</a></p>';
+			. ' <a href="https://www.apeiron-registry.com/protect" target="_blank">Learn more →</a>'
+			. '</p>'
+			. '<p style="color:#555;font-size:13px;max-width:600px;margin-top:6px">'
+			. esc_html__( 'Are you building an AI agent and want to be officially recognized? Register your agent on Apeiron Registry for compliance, transparency, and verified access to publisher content.', 'apeiron-ai-bot-tracker' )
+			. ' <a href="https://www.apeiron-registry.com" target="_blank">' . esc_html__( 'Register your agent →', 'apeiron-ai-bot-tracker' ) . '</a>'
+			. '</p>';
 	}
 
 	public function render_text_field( array $args ): void {
@@ -519,7 +537,7 @@ class Apeiron_Admin {
 		] );
 
 		// Inline JS per rigenerare la Stats API Key dalla pagina settings
-		if ( 'settings_page_apeiron-settings' === $hook ) {
+		if ( 'apeiron_page_apeiron-settings' === $hook ) {
 			wp_add_inline_script( 'apeiron-admin', '
 			( function() {
 				var btn = document.getElementById( "apeiron-regenerate-key" );
