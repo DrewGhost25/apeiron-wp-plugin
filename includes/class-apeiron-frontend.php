@@ -98,7 +98,7 @@ class Apeiron_Frontend {
 					exit;
 				}
 
-				$result = $this->verify_with_registry( $agent_id, $api_key, $post_id, $user_agent );
+				$result = $this->verify_with_registry( $agent_id, $api_key, $post_id, $user_agent, $mode );
 				$fail_open_codes = [ 'REGISTRY_UNREACHABLE', 'REGISTRY_ERROR', 'INVALID_RESPONSE', 'HTTPS_REQUIRED' ];
 				$is_fail_open    = in_array( $result['code'] ?? '', $fail_open_codes, true );
 				if ( ! $is_fail_open ) {
@@ -207,7 +207,7 @@ class Apeiron_Frontend {
 	 * FIX 5: Sends IP + User-Agent for compliance/provenance
 	 * FIX 3: Email debounce — sends X-Debounce-Key header
 	 */
-	private function verify_with_registry( string $agent_id, string $api_key, int $post_id, string $user_agent ): array {
+	private function verify_with_registry( string $agent_id, string $api_key, int $post_id, string $user_agent, string $mode = 'registry_log' ): array {
 		$registry_url    = get_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
 		$publisher_email = get_option( 'apeiron_publisher_email', '' );
 
@@ -241,23 +241,24 @@ class Apeiron_Frontend {
 			],
 		] );
 
-		// FIX 4: Fail-open — if API is down, allow access and log error
+		// Fail-open (registry_log) vs fail-closed (registry_block) on API errors
+		$fail_verified = ( 'registry_block' !== $mode );
+
 		if ( is_wp_error( $response ) ) {
-			error_log( 'Apeiron Registry: API unreachable (' . $response->get_error_message() . '). Failing open.' );
-			return [ 'verified' => true, 'code' => 'REGISTRY_UNREACHABLE' ];
+			error_log( 'Apeiron Registry: API unreachable (' . $response->get_error_message() . '). ' . ( $fail_verified ? 'Failing open.' : 'Failing closed (registry_block).' ) );
+			return [ 'verified' => $fail_verified, 'code' => 'REGISTRY_UNREACHABLE' ];
 		}
 
 		$http_code = wp_remote_retrieve_response_code( $response );
 
-		// FIX 4: Fail-open on server errors (5xx)
 		if ( $http_code >= 500 ) {
-			error_log( 'Apeiron Registry: API returned ' . $http_code . '. Failing open.' );
-			return [ 'verified' => true, 'code' => 'REGISTRY_ERROR' ];
+			error_log( 'Apeiron Registry: API returned ' . $http_code . '. ' . ( $fail_verified ? 'Failing open.' : 'Failing closed.' ) );
+			return [ 'verified' => $fail_verified, 'code' => 'REGISTRY_ERROR' ];
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( ! is_array( $body ) ) {
-			return [ 'verified' => true, 'code' => 'INVALID_RESPONSE' ]; // fail-open
+			return [ 'verified' => $fail_verified, 'code' => 'INVALID_RESPONSE' ];
 		}
 
 		// FIX 3: If verified, set debounce transient (no more emails for 24h)
