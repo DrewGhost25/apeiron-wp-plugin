@@ -123,11 +123,15 @@
 			} );
 
 			if ( markRes.success ) {
-				statusEl.text( i18n.success + tx.hash.substring( 0, 12 ) + '…' ).css( 'color', '#27ae60' );
-				// Aggiorna lo stato nella meta box senza ricaricare
+				statusEl.html(
+					i18n.success +
+					'<br><small style="word-break:break-all;user-select:all">TX: ' + tx.hash + '</small>'
+				).css( 'color', '#27ae60' );
+				// Aggiorna lo stato nella meta box — mostra hash completo, selezionabile
 				$( '.apeiron-not-registered' ).replaceWith(
-					'<span class="apeiron-registered">&#10003; Registrato on-chain</span>' +
-					'<br><small>ID: <code>' + cId.substring( 0, 12 ) + '…</code></small>'
+					'<span class="apeiron-registered">&#10003; Registered on-chain</span>' +
+					'<br><small>ID: <code title="' + cId + '" style="cursor:pointer;word-break:break-all;user-select:all">' + cId + '</code></small>' +
+					'<br><small>TX: <code title="' + tx.hash + '" style="cursor:pointer;word-break:break-all;user-select:all">' + tx.hash + '</code></small>'
 				);
 			}
 
