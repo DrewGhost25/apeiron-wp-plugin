@@ -336,6 +336,9 @@ class Apeiron_Admin {
 					<div id="apeiron-ai-only-notice" style="<?php echo $mode !== 'ai_only' ? 'display:none;' : ''; ?>background:#1a2a3a;border-left:3px solid #c8a96e;padding:8px 10px;margin-bottom:8px;border-radius:3px;font-size:12px;color:#c8a96e;line-height:1.4">
 						ℹ️ <?php esc_html_e( 'The smart contract requires a human price at registration. Human readers will not be wallet-checked — they access content freely. Only AI bots are gated.', 'apeiron-ai-bot-tracker' ); ?>
 					</div>
+					<div id="apeiron-registry-log-notice" style="<?php echo ! in_array( $mode, [ 'registry_log', 'registry_block' ], true ) ? 'display:none;' : ''; ?>background:#1a2a3a;border-left:3px solid #c8a96e;padding:8px 10px;margin-bottom:8px;border-radius:3px;font-size:12px;color:#c8a96e;line-height:1.4">
+						ℹ️ <?php esc_html_e( 'In Registry Log / Registry Block mode, pricing fields are saved for future use but no payment is charged. Bots are identified via Apeiron Registry — not via the smart contract.', 'apeiron-ai-bot-tracker' ); ?>
+					</div>
 					<p>
 						<label for="apeiron_human_price">
 							<?php esc_html_e( 'Human reader price (USDC)', 'apeiron-ai-bot-tracker' ); ?>
@@ -395,17 +398,21 @@ class Apeiron_Admin {
 		// Inline script via wp_add_inline_script (no direct <script> tags in templates)
 		wp_add_inline_script( 'apeiron-admin', '
 			( function() {
-				const sel     = document.getElementById( "apeiron_mode" );
-				const fields  = document.getElementById( "apeiron-price-fields" );
-				const notice  = document.getElementById( "apeiron-ai-only-notice" );
-				const preview = document.getElementById( "apeiron-preview-field" );
+				const sel         = document.getElementById( "apeiron_mode" );
+				const fields      = document.getElementById( "apeiron-price-fields" );
+				const noticeAi    = document.getElementById( "apeiron-ai-only-notice" );
+				const noticeReg   = document.getElementById( "apeiron-registry-log-notice" );
+				const preview     = document.getElementById( "apeiron-preview-field" );
 				if ( ! sel ) return;
 				sel.addEventListener( "change", function() {
-					var isDisabled = this.value === "disabled";
-					var isAiOnly   = this.value === "ai_only";
-					fields.style.display  = isDisabled ? "none" : "";
-					notice.style.display  = isAiOnly   ? ""     : "none";
-					preview.style.display = isAiOnly   ? "none" : "";
+					var v          = this.value;
+					var isDisabled = v === "disabled";
+					var isAiOnly   = v === "ai_only";
+					var isRegistry = v === "registry_log" || v === "registry_block";
+					fields.style.display    = isDisabled ? "none" : "";
+					noticeAi.style.display  = isAiOnly   ? ""     : "none";
+					noticeReg.style.display = isRegistry ? ""     : "none";
+					preview.style.display   = isAiOnly   ? "none" : "";
 				} );
 			} )();
 		' );
