@@ -52,10 +52,11 @@ class Apeiron_Frontend {
 		// ── DETECT mode: always log every AI bot hit ──────────────────────────
 		$detector = new Apeiron_Detector();
 		$bot_info = $detector->detect( $user_agent );
+		$log_id   = 0;
+		$logger   = new Apeiron_Logger();
 		if ( $bot_info['detected'] ) {
 			$agent_id_header = $_SERVER['HTTP_X_APEIRON_AGENT_ID'] ?? '';
-			$logger          = new Apeiron_Logger();
-			$logger->log(
+			$log_id = $logger->log(
 				$bot_info,
 				$post_id,
 				$user_agent,
@@ -76,22 +77,17 @@ class Apeiron_Frontend {
 			$api_key  = $_SERVER['HTTP_X_APEIRON_API_KEY']  ?? '';
 
 			if ( $agent_id && $api_key ) {
-				// ── FIX 1: Transient cache — evita chiamate API duplicate ─────
 				$cache_key = 'apeiron_v_' . md5( $agent_id . $api_key );
 				$cached    = get_transient( $cache_key );
 
 				if ( false !== $cached ) {
-					// Cache hit — skip API call
 					if ( $cached['verified'] ) {
-						// ── FIX 5: Confirmation header ───────────────────────
 						header( 'X-Apeiron-Verified: true' );
 						header( 'X-Apeiron-Agent: ' . sanitize_text_field( $agent_id ) );
-
-						// Log this access (non-blocking) but skip email (debounce)
+						$logger->mark_verified( $log_id, $agent_id );
 						$this->log_verified_access_async( $agent_id, $api_key, $post_id, $user_agent, false );
 						return;
 					}
-					// Cached as invalid → reject
 					http_response_code( 401 );
 					header( 'Content-Type: application/json; charset=utf-8' );
 					echo wp_json_encode( [
@@ -102,17 +98,14 @@ class Apeiron_Frontend {
 					exit;
 				}
 
-				// ── Cache miss — call Apeiron API ────────────────────────────
 				$result = $this->verify_with_registry( $agent_id, $api_key, $post_id, $user_agent );
-
-				// Cache the result (1 hour for valid, 5 min for invalid)
-				$ttl = $result['verified'] ? self::VERIFY_CACHE_TTL : 300;
+				$ttl    = $result['verified'] ? self::VERIFY_CACHE_TTL : 300;
 				set_transient( $cache_key, $result, $ttl );
 
 				if ( $result['verified'] ) {
-					// ── FIX 5: Confirmation header ───────────────────────────
 					header( 'X-Apeiron-Verified: true' );
 					header( 'X-Apeiron-Agent: ' . sanitize_text_field( $agent_id ) );
+					$logger->mark_verified( $log_id, $agent_id );
 					return;
 				}
 

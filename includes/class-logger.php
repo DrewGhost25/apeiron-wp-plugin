@@ -17,7 +17,7 @@ class Apeiron_Logger {
 	 * @param bool   $verified   Se l'agente è verificato
 	 * @param string $action     'allowed'|'blocked'|'registry_verified'|'logged'
 	 */
-	public function log( array $bot, int $post_id, string $user_agent, string $ip, string $agent_id, bool $verified, string $action ): void {
+	public function log( array $bot, int $post_id, string $user_agent, string $ip, string $agent_id, bool $verified, string $action ): int {
 		global $wpdb;
 
 		$request_url = $post_id > 0 ? ( get_permalink( $post_id ) ?: sanitize_text_field( $_SERVER['REQUEST_URI'] ?? '' ) ) : sanitize_text_field( $_SERVER['REQUEST_URI'] ?? '' );
@@ -46,7 +46,28 @@ class Apeiron_Logger {
 
 		if ( false === $result ) {
 			error_log( 'Apeiron Logger: DB insert failed — ' . $wpdb->last_error );
+			return 0;
 		}
+		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Aggiorna un log entry esistente come verificato da Apeiron Registry.
+	 */
+	public function mark_verified( int $log_id, string $agent_id ): void {
+		global $wpdb;
+		if ( $log_id <= 0 ) return;
+		$wpdb->update(
+			$wpdb->prefix . 'apeiron_bot_log',
+			[
+				'is_registered_agent' => 1,
+				'agent_id'            => sanitize_text_field( $agent_id ),
+				'action_taken'        => 'registry_verified',
+			],
+			[ 'id' => $log_id ],
+			[ '%d', '%s', '%s' ],
+			[ '%d' ]
+		);
 	}
 
 	/**
