@@ -53,19 +53,31 @@ class Apeiron_Logger {
 
 	/**
 	 * Aggiorna un log entry esistente come verificato da Apeiron Registry.
+	 * Se company_name è fornito, sovrascrive bot_name e bot_company con i dati reali dell'agente.
 	 */
-	public function mark_verified( int $log_id, string $agent_id ): void {
+	public function mark_verified( int $log_id, string $agent_id, string $company_name = '' ): void {
 		global $wpdb;
 		if ( $log_id <= 0 ) return;
+
+		$data   = [
+			'is_registered_agent' => 1,
+			'agent_id'            => sanitize_text_field( $agent_id ),
+			'action_taken'        => 'registry_verified',
+		];
+		$format = [ '%d', '%s', '%s' ];
+
+		if ( $company_name ) {
+			$data['bot_name']    = sanitize_text_field( $company_name );
+			$data['bot_company'] = sanitize_text_field( $company_name );
+			$format[]            = '%s';
+			$format[]            = '%s';
+		}
+
 		$wpdb->update(
 			$wpdb->prefix . 'apeiron_bot_log',
-			[
-				'is_registered_agent' => 1,
-				'agent_id'            => sanitize_text_field( $agent_id ),
-				'action_taken'        => 'registry_verified',
-			],
+			$data,
 			[ 'id' => $log_id ],
-			[ '%d', '%s', '%s' ],
+			$format,
 			[ '%d' ]
 		);
 	}

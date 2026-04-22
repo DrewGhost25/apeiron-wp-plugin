@@ -84,7 +84,7 @@ class Apeiron_Frontend {
 					if ( $cached['verified'] ) {
 						header( 'X-Apeiron-Verified: true' );
 						header( 'X-Apeiron-Agent: ' . sanitize_text_field( $agent_id ) );
-						$logger->mark_verified( $log_id, $agent_id );
+						$logger->mark_verified( $log_id, $agent_id, $cached['company_name'] ?? '' );
 						$this->log_verified_access_async( $agent_id, $api_key, $post_id, $user_agent, false );
 						return;
 					}
@@ -105,7 +105,7 @@ class Apeiron_Frontend {
 				if ( $result['verified'] ) {
 					header( 'X-Apeiron-Verified: true' );
 					header( 'X-Apeiron-Agent: ' . sanitize_text_field( $agent_id ) );
-					$logger->mark_verified( $log_id, $agent_id );
+					$logger->mark_verified( $log_id, $agent_id, $result['company_name'] ?? '' );
 					return;
 				}
 
