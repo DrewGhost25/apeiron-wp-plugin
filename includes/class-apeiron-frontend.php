@@ -30,7 +30,7 @@ class Apeiron_Frontend {
 	const EMAIL_DEBOUNCE_TTL = 86400; // 24 hours
 
 	// Max time to wait for Apeiron API (in seconds)
-	const API_TIMEOUT = 2;
+	const API_TIMEOUT = 8;
 
 	public function init(): void {
 		add_action( 'template_redirect',   [ $this, 'maybe_intercept_bot' ], 1 );
@@ -99,8 +99,12 @@ class Apeiron_Frontend {
 				}
 
 				$result = $this->verify_with_registry( $agent_id, $api_key, $post_id, $user_agent );
-				$ttl    = $result['verified'] ? self::VERIFY_CACHE_TTL : 300;
-				set_transient( $cache_key, $result, $ttl );
+				$fail_open_codes = [ 'REGISTRY_UNREACHABLE', 'REGISTRY_ERROR', 'INVALID_RESPONSE', 'HTTPS_REQUIRED' ];
+				$is_fail_open    = in_array( $result['code'] ?? '', $fail_open_codes, true );
+				if ( ! $is_fail_open ) {
+					$ttl = $result['verified'] ? self::VERIFY_CACHE_TTL : 300;
+					set_transient( $cache_key, $result, $ttl );
+				}
 
 				if ( $result['verified'] ) {
 					header( 'X-Apeiron-Verified: true' );
