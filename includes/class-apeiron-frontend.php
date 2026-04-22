@@ -277,7 +277,7 @@ class Apeiron_Frontend {
 		$publisher_email = get_option( 'apeiron_publisher_email', '' );
 
 		wp_remote_post( $registry_url, [
-			'timeout'  => 1,
+			'timeout'  => 5,
 			'blocking' => false, // fire and forget — don't slow down the response
 			'headers'  => [
 				'X-Apeiron-Agent-ID'   => $agent_id,
@@ -302,7 +302,7 @@ class Apeiron_Frontend {
 		$publisher_email = get_option( 'apeiron_publisher_email', '' );
 
 		wp_remote_post( $registry_url, [
-			'timeout'  => 1,
+			'timeout'  => 5,
 			'blocking' => false,
 			'headers'  => [
 				'X-Apeiron-Agent-ID'  => 'anonymous',
