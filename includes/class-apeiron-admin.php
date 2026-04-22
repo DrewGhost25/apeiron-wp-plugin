@@ -269,7 +269,7 @@ class Apeiron_Admin {
 	public function add_meta_box(): void {
 		add_meta_box(
 			'apeiron_meta',
-			__( 'Apeiron Paywall', 'apeiron-ai-bot-tracker' ),
+			__( 'Apeiron', 'apeiron-ai-bot-tracker' ),
 			[ $this, 'render_meta_box' ],
 			'post',
 			'side',
