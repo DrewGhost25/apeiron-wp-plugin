@@ -88,7 +88,7 @@ class Apeiron_Frontend {
 						$this->log_verified_access_async( $agent_id, $api_key, $post_id, $user_agent, false );
 						return;
 					}
-					http_response_code( 401 );
+					status_header( 401 );
 					header( 'Content-Type: application/json; charset=utf-8' );
 					echo wp_json_encode( [
 						'error'        => 'Invalid agent credentials',
@@ -116,7 +116,7 @@ class Apeiron_Frontend {
 				// ── FIX 4: Fail-open check ───────────────────────────────────
 				// If the result code is REGISTRY_UNREACHABLE, we already passed
 				// through in verify_with_registry(). This path means invalid creds.
-				http_response_code( 401 );
+				status_header( 401 );
 				header( 'Content-Type: application/json; charset=utf-8' );
 				echo wp_json_encode( [
 					'error'        => 'Invalid agent credentials',
@@ -128,7 +128,7 @@ class Apeiron_Frontend {
 
 			// Nessun header Registry
 			if ( 'registry_block' === $mode ) {
-				http_response_code( 401 );
+				status_header( 401 );
 				header( 'Content-Type: application/json; charset=utf-8' );
 				header( 'X-Apeiron-Protocol: registry-v1' );
 				echo wp_json_encode( [
@@ -172,7 +172,7 @@ class Apeiron_Frontend {
 		$usdc_address    = get_option( 'apeiron_usdc_address',    APEIRON_DEFAULT_USDC );
 		$price_wei       = (string) (int) ( (float) $ai_price * 1_000_000 );
 
-		http_response_code( 402 );
+		status_header( 402 );
 		header( 'Content-Type: application/json; charset=utf-8' );
 		header( 'X-Apeiron-Protocol: x402' );
 		echo wp_json_encode( [
