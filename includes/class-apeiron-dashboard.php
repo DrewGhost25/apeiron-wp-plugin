@@ -419,14 +419,16 @@ class Apeiron_Dashboard {
 	}
 
 	private function get_protected_articles(): array {
+		// Includi tutti gli articoli registrati on-chain (hanno _apeiron_content_id)
+		// indipendentemente dalla modalità (ai_only, full, registry_log, ecc.)
 		$query = new WP_Query( [
 			'post_type'      => 'post',
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
 			'meta_query'     => [
 				[
-					'key'   => '_apeiron_protected',
-					'value' => '1',
+					'key'     => '_apeiron_content_id',
+					'compare' => 'EXISTS',
 				],
 			],
 		] );
