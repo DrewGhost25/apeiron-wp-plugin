@@ -261,6 +261,16 @@
 	// ── Init ─────────────────────────────────────────────────────────────────
 
 	function init() {
+		// Guard: configurazione mancante
+		if ( typeof ethers === 'undefined' ) {
+			setStatus( 'Error: Web3 library not loaded. Reload the page.', true );
+			return;
+		}
+		if ( ! gatewayAddress || ! usdcAddress ) {
+			setStatus( 'Error: Gateway or USDC address not configured. Check Apeiron Settings.', true );
+			return;
+		}
+
 		const connectBtn = $( 'apeiron-connect-btn' );
 		const payBtn     = $( 'apeiron-pay-btn' );
 
@@ -270,11 +280,6 @@
 
 		if ( payBtn ) {
 			payBtn.addEventListener( 'click', handlePayClick );
-		}
-
-		// Se ethers non è disponibile, mostra avviso
-		if ( typeof ethers === 'undefined' ) {
-			setStatus( 'Error: Web3 library not loaded. Reload the page.', true );
 		}
 	}
 
