@@ -573,9 +573,9 @@ class Apeiron_Dashboard {
 			$protected_articles = $this->get_protected_articles();
 
 			wp_localize_script( 'apeiron-dashboard', 'apeironDash', [
-				'gatewayAddress'  => get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY ),
+				'gatewayAddress'  => get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY ) ?: APEIRON_DEFAULT_GATEWAY,
 				'publisherWallet' => get_option( 'apeiron_publisher_wallet', '' ),
-				'rpcUrl'          => get_option( 'apeiron_rpc_url', APEIRON_DEFAULT_RPC ),
+				'rpcUrl'          => get_option( 'apeiron_rpc_url', APEIRON_DEFAULT_RPC )         ?: APEIRON_DEFAULT_RPC,
 				'chainId'         => APEIRON_CHAIN_ID,
 				'articles'        => $protected_articles,
 			] );

@@ -126,6 +126,15 @@
 	async function loadAnalytics() {
 		if ( ! articles || articles.length === 0 ) return;
 
+		if ( ! rpcUrl ) {
+			showWalletError( '⚠ RPC URL not configured. Check Apeiron Settings.' );
+			return;
+		}
+		if ( ! gatewayAddress ) {
+			showWalletError( '⚠ Gateway address not configured. Check Apeiron Settings.' );
+			return;
+		}
+
 		setLoading( true );
 		setKpi( 'dash-total-revenue', '…' );
 		setKpi( 'dash-total-humans',  '…' );
