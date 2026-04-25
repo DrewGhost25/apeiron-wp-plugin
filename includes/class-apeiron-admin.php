@@ -386,6 +386,10 @@ class Apeiron_Admin {
 
 				<hr>
 
+				<p style="font-size:11px;color:#888;background:#1a1a1a;border-left:3px solid #555;padding:6px 8px;border-radius:3px;line-height:1.5">
+					⚠️ <?php esc_html_e( 'Payments are sent to the wallet used at registration time. Changing the Publisher Wallet in Settings does not affect already-registered articles.', 'apeiron-ai-bot-tracker' ); ?>
+				</p>
+
 				<p class="apeiron-status">
 					<?php if ( $registered ) : ?>
 						<span class="apeiron-registered">&#10003; <?php esc_html_e( 'Registered on-chain', 'apeiron-ai-bot-tracker' ); ?></span>
