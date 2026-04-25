@@ -1,10 +1,12 @@
-# Apeiron — AI Bot Tracker & Web3 Paywall for WordPress
+# Apeiron — AI Bot Tracker
 
 > **Know which AI agents are reading your content.**
 > **Block anonymous bots. Charge verified ones.**
 > **Get notified when a verified AI company reads your articles.**
 
-[![WordPress](https://img.shields.io/badge/WordPress-6.0%2B-blue?logo=wordpress)](https://wordpress.org)
+WordPress plugin slug: **`apeiron-ai-bot-tracker`**
+
+[![WordPress](https://img.shields.io/badge/WordPress-5.8%2B-blue?logo=wordpress)](https://wordpress.org)
 [![Apeiron Registry](https://img.shields.io/badge/Apeiron-Registry-c8a96e)](https://www.apeiron-registry.com)
 [![Base Mainnet](https://img.shields.io/badge/Base-Mainnet-0052ff?logo=coinbase)](https://base.org)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
