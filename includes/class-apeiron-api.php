@@ -156,8 +156,8 @@ class Apeiron_Api {
 		}
 		$price_wei   = $this->usdc_to_wei( $price_usdc );
 
-		$gateway_address = get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY );
-		$usdc_address    = get_option( 'apeiron_usdc_address',    APEIRON_DEFAULT_USDC );
+		$gateway_address = get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY ) ?: APEIRON_DEFAULT_GATEWAY;
+		$usdc_address    = get_option( 'apeiron_usdc_address',    APEIRON_DEFAULT_USDC )    ?: APEIRON_DEFAULT_USDC;
 
 		// ── Nessun wallet → HTTP 402 ─────────────────────────────────────────
 		$wallet = $request->get_header( 'x_wallet_address' );
@@ -227,8 +227,8 @@ class Apeiron_Api {
 	 * Selector hasAccess(address,bytes32,uint8) = 4a0f4a07
 	 */
 	private function call_has_access( string $wallet, string $content_id, int $access_type = 0 ): bool|WP_Error {
-		$rpc_url  = get_option( 'apeiron_rpc_url',         APEIRON_DEFAULT_RPC );
-		$gateway  = get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY );
+		$rpc_url  = get_option( 'apeiron_rpc_url',         APEIRON_DEFAULT_RPC )     ?: APEIRON_DEFAULT_RPC;
+		$gateway  = get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY ) ?: APEIRON_DEFAULT_GATEWAY;
 
 		$content_id_hex = ltrim( $content_id, '0x' );
 		if ( strlen( $content_id_hex ) !== 64 ) {
