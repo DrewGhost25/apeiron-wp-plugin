@@ -522,8 +522,8 @@ class Apeiron_Admin {
 			'ajaxUrl'         => admin_url( 'admin-ajax.php' ),
 			'nonce'           => wp_create_nonce( 'apeiron_register' ),
 			'adminNonce'      => wp_create_nonce( 'apeiron_admin_nonce' ),
-			'gatewayAddress'  => get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY ),
-			'usdcAddress'     => get_option( 'apeiron_usdc_address',    APEIRON_DEFAULT_USDC ),
+			'gatewayAddress'  => get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY ) ?: APEIRON_DEFAULT_GATEWAY,
+			'usdcAddress'     => get_option( 'apeiron_usdc_address',    APEIRON_DEFAULT_USDC )    ?: APEIRON_DEFAULT_USDC,
 			'publisherWallet' => get_option( 'apeiron_publisher_wallet', '' ),
 			'chainId'         => APEIRON_CHAIN_ID,
 			'i18n'            => [
