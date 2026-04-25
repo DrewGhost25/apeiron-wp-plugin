@@ -2,7 +2,7 @@
 Contributors:      drewghost25
 Tags:              ai, bots, tracker, chatgpt, claude, crawler, analytics
 Requires at least: 5.8
-Tested up to:      6.7
+Tested up to:      6.9
 Stable tag:        2.1.0
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
