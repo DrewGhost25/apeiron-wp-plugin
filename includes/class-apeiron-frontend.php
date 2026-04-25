@@ -392,7 +392,7 @@ class Apeiron_Frontend {
 
 		wp_enqueue_script( 'ethers',
 			APEIRON_URL . 'assets/js/ethers.umd.min.js',
-			[], '6.13.4', true
+			[], '6.16.0', true
 		);
 
 		wp_enqueue_script( 'apeiron-paywall',

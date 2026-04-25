@@ -506,7 +506,7 @@ class Apeiron_Admin {
 			'ethers',
 			APEIRON_URL . 'assets/js/ethers.umd.min.js', // bundled locally
 			[],
-			'6.13.4',
+			'6.16.0',
 			true
 		);
 
