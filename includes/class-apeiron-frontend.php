@@ -452,7 +452,7 @@ class Apeiron_Frontend {
 		$content_id      = get_post_meta( $post_id, '_apeiron_content_id', true )  ?: '';
 		$gateway_address = get_option( 'apeiron_gateway_address', APEIRON_DEFAULT_GATEWAY );
 		$usdc_address    = get_option( 'apeiron_usdc_address',    APEIRON_DEFAULT_USDC );
-		$show_branding   = (bool) get_option( 'apeiron_show_branding', '1' );
+		$show_branding   = (bool) get_option( 'apeiron_show_branding', '0' ); // Opt-in (Guideline 10)
 		ob_start();
 		include APEIRON_PATH . 'templates/paywall-template.php';
 		return ob_get_clean();

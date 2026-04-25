@@ -3,7 +3,7 @@ Contributors:      drewghost25
 Tags:              ai, bots, tracker, chatgpt, claude, crawler, analytics
 Requires at least: 5.8
 Tested up to:      6.7
-Stable tag:        2.0.0
+Stable tag:        2.1.0
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -117,6 +117,17 @@ Note: ethers.js internally contains fallback URLs for Etherscan and other block 
 
 == Changelog ==
 
+= 2.1.0 =
+* HMAC request signing for Apeiron Registry agents — bot signs each request locally with a signing secret that is never sent over the wire (replaces legacy API key in headers; legacy path kept for backward compatibility)
+* New headers forwarded to the registry: `X-Apeiron-Timestamp` and `X-Apeiron-Signature` (HMAC-SHA256)
+* Universal Apeiron header detection — registered agents are recognized in any mode regardless of User-Agent string
+* `mark_verified` always overwrites `bot_company` so private agents show "Private" instead of a misleading detector guess
+* New "Payments" admin submenu — dedicated page for on-chain analytics (revenue, human readers, AI bot payments) instead of being collapsed at the bottom of the Dashboard
+* Settings page cleanup — removed the three empty preset fields (Gateway, USDC, RPC). They are protocol constants and the code already falls back to them when the option is empty
+* Fix (Guideline 10): "Secured by Apeiron" branding is now opt-in (off by default)
+* ethers.js bundle updated to v6.16.0
+* Documentation: complete README and readme.txt rewrite to reflect all v2.x features (Apeiron Registry, HMAC, 5 protection modes, bot tracking dashboard, weekly email digest)
+
 = 2.0.0 =
 * Complete rebranding: Apeiron — AI Bot Tracker
 * DETECT mode: automatic bot detection and logging on all articles (no configuration needed)
@@ -142,6 +153,9 @@ Note: ethers.js internally contains fallback URLs for Etherscan and other block 
 * Initial release — USDC paywall on Base Mainnet
 
 == Upgrade Notice ==
+
+= 2.1.0 =
+HMAC request signing for Apeiron Registry agents (signing secret never leaves the bot), new dedicated Payments admin page, opt-in branding for Guideline 10 compliance, ethers.js updated to 6.16.0. Backward compatible — existing settings preserved.
 
 = 2.0.0 =
 Major update. New database tables are created automatically on activation. All existing settings and per-article configurations are preserved.

@@ -112,11 +112,12 @@ class Apeiron_Admin {
 	}
 
 	public function render_show_branding_field(): void {
-		$value = get_option( 'apeiron_show_branding', '1' );
+		// Opt-in by default per WordPress.org Guideline 10 (no public credits without explicit user permission).
+		$value = get_option( 'apeiron_show_branding', '0' );
 		printf(
 			'<label><input type="checkbox" name="apeiron_show_branding" value="1" %s /> %s</label>',
 			checked( 1, (int) $value, false ),
-			esc_html__( 'Show \'Secured by Apeiron\' on paywall (optional)', 'apeiron-ai-bot-tracker' )
+			esc_html__( 'Show \'Secured by Apeiron\' on paywall (off by default — enable to credit the plugin)', 'apeiron-ai-bot-tracker' )
 		);
 	}
 
