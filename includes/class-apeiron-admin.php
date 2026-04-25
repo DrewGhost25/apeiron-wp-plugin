@@ -77,7 +77,8 @@ class Apeiron_Admin {
 			'apeiron-settings'
 		);
 
-		// Publisher wallet — editable
+		// Publisher wallet — editable. The only x402 field a publisher needs to set;
+		// gateway, USDC and RPC are protocol constants (see APEIRON_DEFAULT_*).
 		register_setting( 'apeiron_settings', 'apeiron_publisher_wallet', [
 			'sanitize_callback' => 'sanitize_text_field',
 		] );
@@ -88,26 +89,6 @@ class Apeiron_Admin {
 			'apeiron-settings',
 			'apeiron_main'
 		);
-
-		// Fixed contract addresses — readonly
-		$readonly_fields = [
-			'gateway_address' => __( 'Gateway Contract Address', 'apeiron-ai-bot-tracker' ),
-			'usdc_address'    => __( 'USDC Token Address', 'apeiron-ai-bot-tracker' ),
-			'rpc_url'         => __( 'Base RPC URL', 'apeiron-ai-bot-tracker' ),
-		];
-		foreach ( $readonly_fields as $key => $label ) {
-			register_setting( 'apeiron_settings', "apeiron_{$key}", [
-				'sanitize_callback' => 'sanitize_text_field',
-			] );
-			add_settings_field(
-				"apeiron_{$key}",
-				$label,
-				[ $this, 'render_readonly_field' ],
-				'apeiron-settings',
-				'apeiron_main',
-				[ 'key' => $key ]
-			);
-		}
 
 		// ── Registry settings ─────────────────────────────────────────────────
 		add_settings_section(

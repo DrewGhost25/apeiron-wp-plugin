@@ -42,6 +42,16 @@ class Apeiron_Dashboard {
 			[ $this, 'render_page' ]
 		);
 
+		// Sottomenu: Payments (on-chain analytics)
+		add_submenu_page(
+			'apeiron-dashboard',
+			__( 'Payments', 'apeiron-ai-bot-tracker' ),
+			__( 'Payments', 'apeiron-ai-bot-tracker' ),
+			'edit_posts',
+			'apeiron-payments',
+			[ $this, 'render_payments_page' ]
+		);
+
 		// Sottomenu: Bot Activity
 		add_submenu_page(
 			'apeiron-dashboard',
@@ -205,90 +215,111 @@ class Apeiron_Dashboard {
 				<?php endif; ?>
 			</div>
 
-			<!-- On-chain analytics (sezione collassabile) -->
-			<details style="margin-top:32px">
-				<summary style="cursor:pointer;color:#c8a96e;font-size:16px;font-weight:600;padding:12px 0">
-					<?php esc_html_e( 'On-Chain Analytics (requires wallet)', 'apeiron-ai-bot-tracker' ); ?>
-				</summary>
-				<div style="margin-top:16px">
-					<div class="apeiron-dash-header" style="margin-bottom:16px">
-						<div>
-							<p class="apeiron-dash-subtitle">
-								<?php esc_html_e( 'Connect your wallet to see on-chain revenue, readers and AI bot payments.', 'apeiron-ai-bot-tracker' ); ?>
-							</p>
-						</div>
-						<div class="apeiron-dash-actions">
-							<button id="apeiron-dash-connect" class="apeiron-dash-btn apeiron-dash-btn-connect">
-								<?php esc_html_e( 'Connect Wallet', 'apeiron-ai-bot-tracker' ); ?>
-							</button>
-						</div>
-					</div>
+			<!-- On-chain analytics moved to dedicated "Payments" page -->
+			<p style="margin-top:32px;color:#888;font-size:13px">
+				<?php
+				printf(
+					/* translators: %s: link to Payments page */
+					esc_html__( 'Looking for on-chain revenue and payment analytics? See the %s page.', 'apeiron-ai-bot-tracker' ),
+					'<a href="' . esc_url( admin_url( 'admin.php?page=apeiron-payments' ) ) . '" style="color:#c8a96e">' . esc_html__( 'Payments', 'apeiron-ai-bot-tracker' ) . '</a>'
+				);
+				?>
+			</p>
 
-					<div id="apeiron-dash-wallet-error" style="display:none" class="apeiron-dash-wallet-error"></div>
+		</div>
+		<?php
+	}
 
-					<div class="apeiron-dash-kpis">
-						<div class="apeiron-dash-kpi">
-							<span class="apeiron-dash-kpi-value apeiron-dash-kpi-revenue" id="dash-total-revenue">—</span>
-							<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'TOTAL REVENUE (USDC)', 'apeiron-ai-bot-tracker' ); ?></span>
-						</div>
-						<div class="apeiron-dash-kpi">
-							<span class="apeiron-dash-kpi-value" id="dash-total-humans">—</span>
-							<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'HUMAN READERS', 'apeiron-ai-bot-tracker' ); ?></span>
-						</div>
-						<div class="apeiron-dash-kpi apeiron-dash-kpi-ai">
-							<span class="apeiron-dash-kpi-value apeiron-dash-kpi-ai-val" id="dash-total-bots">—</span>
-							<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'AI BOTS INTERCEPTED (on-chain)', 'apeiron-ai-bot-tracker' ); ?></span>
-						</div>
-					</div>
+	// ── Payments page (on-chain analytics) ───────────────────────────────────
 
-					<div id="apeiron-dash-loading" style="display:none" class="apeiron-dash-loading">
-						<span class="apeiron-dash-spinner"></span>
-						<?php esc_html_e( 'Reading on-chain data…', 'apeiron-ai-bot-tracker' ); ?>
-					</div>
+	public function render_payments_page(): void {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return;
+		}
 
-					<div class="apeiron-dash-table-wrap" style="margin-top:16px">
-						<table class="apeiron-dash-table">
-							<thead>
-								<tr>
-									<th><?php esc_html_e( 'ARTICLE', 'apeiron-ai-bot-tracker' ); ?></th>
-									<th><?php esc_html_e( 'HUMANS', 'apeiron-ai-bot-tracker' ); ?></th>
-									<th><?php esc_html_e( 'BOTS', 'apeiron-ai-bot-tracker' ); ?></th>
-									<th><?php esc_html_e( 'REVENUE', 'apeiron-ai-bot-tracker' ); ?></th>
-									<th><?php esc_html_e( 'LINK', 'apeiron-ai-bot-tracker' ); ?></th>
-								</tr>
-							</thead>
-							<tbody id="apeiron-dash-tbody">
-								<?php
-								$protected_articles = $this->get_protected_articles();
-								foreach ( $protected_articles as $article ) : ?>
-									<tr data-content-id="<?php echo esc_attr( $article['content_id'] ); ?>"
-									    data-post-id="<?php echo esc_attr( $article['id'] ); ?>">
-										<td class="apeiron-dash-article-title">
-											<?php echo esc_html( wp_trim_words( $article['title'], 8 ) ); ?>
-										</td>
-										<td class="apeiron-dash-humans">—</td>
-										<td class="apeiron-dash-bots">—</td>
-										<td class="apeiron-dash-revenue">—</td>
-										<td>
-											<a href="<?php echo esc_url( $article['url'] ); ?>"
-											   target="_blank" class="apeiron-dash-view-link">
-												<?php esc_html_e( 'View →', 'apeiron-ai-bot-tracker' ); ?>
-											</a>
-										</td>
-									</tr>
-								<?php endforeach; ?>
-								<?php if ( empty( $protected_articles ) ) : ?>
-									<tr>
-										<td colspan="5" class="apeiron-dash-empty">
-											<?php esc_html_e( 'No on-chain registered articles found.', 'apeiron-ai-bot-tracker' ); ?>
-										</td>
-									</tr>
-								<?php endif; ?>
-							</tbody>
-						</table>
-					</div>
+		$protected_articles = $this->get_protected_articles();
+		?>
+		<div class="wrap apeiron-dashboard-wrap">
+
+			<!-- Header -->
+			<div class="apeiron-dash-header">
+				<div>
+					<h1 class="apeiron-dash-title"><?php esc_html_e( 'Payments', 'apeiron-ai-bot-tracker' ); ?></h1>
+					<p class="apeiron-dash-subtitle">
+						<?php esc_html_e( 'On-chain revenue, human readers and AI bot payments. Connect your publisher wallet to load data from Base Mainnet.', 'apeiron-ai-bot-tracker' ); ?>
+					</p>
 				</div>
-			</details>
+				<div class="apeiron-dash-actions">
+					<button id="apeiron-dash-connect" class="apeiron-dash-btn apeiron-dash-btn-connect">
+						<?php esc_html_e( 'Connect Wallet', 'apeiron-ai-bot-tracker' ); ?>
+					</button>
+				</div>
+			</div>
+
+			<div id="apeiron-dash-wallet-error" style="display:none" class="apeiron-dash-wallet-error"></div>
+
+			<!-- KPI cards -->
+			<div class="apeiron-dash-kpis">
+				<div class="apeiron-dash-kpi">
+					<span class="apeiron-dash-kpi-value apeiron-dash-kpi-revenue" id="dash-total-revenue">—</span>
+					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'TOTAL REVENUE (USDC)', 'apeiron-ai-bot-tracker' ); ?></span>
+				</div>
+				<div class="apeiron-dash-kpi">
+					<span class="apeiron-dash-kpi-value" id="dash-total-humans">—</span>
+					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'HUMAN READERS', 'apeiron-ai-bot-tracker' ); ?></span>
+				</div>
+				<div class="apeiron-dash-kpi apeiron-dash-kpi-ai">
+					<span class="apeiron-dash-kpi-value apeiron-dash-kpi-ai-val" id="dash-total-bots">—</span>
+					<span class="apeiron-dash-kpi-label"><?php esc_html_e( 'AI BOTS INTERCEPTED (on-chain)', 'apeiron-ai-bot-tracker' ); ?></span>
+				</div>
+			</div>
+
+			<div id="apeiron-dash-loading" style="display:none" class="apeiron-dash-loading">
+				<span class="apeiron-dash-spinner"></span>
+				<?php esc_html_e( 'Reading on-chain data…', 'apeiron-ai-bot-tracker' ); ?>
+			</div>
+
+			<!-- Per-article breakdown -->
+			<div class="apeiron-dash-table-wrap" style="margin-top:24px">
+				<h2 style="margin-bottom:12px"><?php esc_html_e( 'Per-article breakdown', 'apeiron-ai-bot-tracker' ); ?></h2>
+				<table class="apeiron-dash-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'ARTICLE', 'apeiron-ai-bot-tracker' ); ?></th>
+							<th><?php esc_html_e( 'HUMANS', 'apeiron-ai-bot-tracker' ); ?></th>
+							<th><?php esc_html_e( 'BOTS', 'apeiron-ai-bot-tracker' ); ?></th>
+							<th><?php esc_html_e( 'REVENUE', 'apeiron-ai-bot-tracker' ); ?></th>
+							<th><?php esc_html_e( 'LINK', 'apeiron-ai-bot-tracker' ); ?></th>
+						</tr>
+					</thead>
+					<tbody id="apeiron-dash-tbody">
+						<?php foreach ( $protected_articles as $article ) : ?>
+							<tr data-content-id="<?php echo esc_attr( $article['content_id'] ); ?>"
+							    data-post-id="<?php echo esc_attr( $article['id'] ); ?>">
+								<td class="apeiron-dash-article-title">
+									<?php echo esc_html( wp_trim_words( $article['title'], 8 ) ); ?>
+								</td>
+								<td class="apeiron-dash-humans">—</td>
+								<td class="apeiron-dash-bots">—</td>
+								<td class="apeiron-dash-revenue">—</td>
+								<td>
+									<a href="<?php echo esc_url( $article['url'] ); ?>"
+									   target="_blank" class="apeiron-dash-view-link">
+										<?php esc_html_e( 'View →', 'apeiron-ai-bot-tracker' ); ?>
+									</a>
+								</td>
+							</tr>
+						<?php endforeach; ?>
+						<?php if ( empty( $protected_articles ) ) : ?>
+							<tr>
+								<td colspan="5" class="apeiron-dash-empty">
+									<?php esc_html_e( 'No on-chain registered articles found. Set an article to "Full" or "AI Only" mode and register it on-chain to see data here.', 'apeiron-ai-bot-tracker' ); ?>
+								</td>
+							</tr>
+						<?php endif; ?>
+					</tbody>
+				</table>
+			</div>
 
 		</div>
 		<?php
@@ -542,7 +573,12 @@ class Apeiron_Dashboard {
 	// ── Assets ───────────────────────────────────────────────────────────────
 
 	public function enqueue_assets( string $hook ): void {
-		$dashboard_hooks = [ 'toplevel_page_apeiron-dashboard', 'apeiron_page_apeiron-bot-activity' ];
+		$dashboard_hooks = [
+			'toplevel_page_apeiron-dashboard',
+			'apeiron_page_apeiron-payments',
+			'apeiron_page_apeiron-bot-activity',
+			'apeiron_page_apeiron-getting-started',
+		];
 		if ( ! in_array( $hook, $dashboard_hooks, true ) ) {
 			return;
 		}
@@ -554,8 +590,8 @@ class Apeiron_Dashboard {
 			APEIRON_VERSION
 		);
 
-		// On-chain assets caricati solo sulla dashboard principale
-		if ( 'toplevel_page_apeiron-dashboard' === $hook ) {
+		// On-chain assets caricati solo sulla pagina Payments
+		if ( 'apeiron_page_apeiron-payments' === $hook ) {
 			wp_enqueue_script(
 				'ethers',
 				APEIRON_URL . 'assets/js/ethers.umd.min.js', // bundled locally

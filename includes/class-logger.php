@@ -72,10 +72,11 @@ class Apeiron_Logger {
 			$data['bot_name'] = sanitize_text_field( $display_name );
 			$format[]         = '%s';
 		}
-		if ( $company_name ) {
-			$data['bot_company'] = sanitize_text_field( $company_name );
-			$format[]            = '%s';
-		}
+		// bot_company: when we know the agent (registry_verified), always overwrite
+		// the detector's guess. Public → real company; private → "Private".
+		// Never leave a misleading "OpenAI"/"Anthropic" guess on a verified non-OpenAI agent.
+		$data['bot_company'] = sanitize_text_field( $company_name ?: 'Private' );
+		$format[]            = '%s';
 
 		$wpdb->update(
 			$wpdb->prefix . 'apeiron_bot_log',

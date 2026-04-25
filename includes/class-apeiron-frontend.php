@@ -50,35 +50,99 @@ class Apeiron_Frontend {
 		$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
 		// ── DETECT mode: always log every AI bot hit ──────────────────────────
-		$detector = new Apeiron_Detector();
-		$bot_info = $detector->detect( $user_agent );
-		$log_id   = 0;
-		$logger   = new Apeiron_Logger();
+		$detector         = new Apeiron_Detector();
+		$bot_info         = $detector->detect( $user_agent );
+		$apeiron_agent    = $_SERVER['HTTP_X_APEIRON_AGENT_ID'] ?? '';
+		$apeiron_api_key  = $_SERVER['HTTP_X_APEIRON_API_KEY']  ?? '';
+		$apeiron_ts       = $_SERVER['HTTP_X_APEIRON_TIMESTAMP'] ?? '';
+		$apeiron_sig      = $_SERVER['HTTP_X_APEIRON_SIGNATURE'] ?? '';
+		$has_apeiron_auth = $apeiron_agent && ( ( $apeiron_ts && $apeiron_sig ) || $apeiron_api_key );
+		$log_id           = 0;
+		$logger           = new Apeiron_Logger();
+
+		// If X-Apeiron headers are present (HMAC or legacy), treat as registered agent.
+		// Override the detector's guess — the registry data is authoritative.
+		if ( $has_apeiron_auth ) {
+			$bot_info = [
+				'detected'  => true,
+				'bot_key'   => 'apeiron_agent',
+				'name'      => $apeiron_agent,
+				'company'   => 'Apeiron Registry',
+				'purpose'   => 'inference',
+			];
+		}
+
 		if ( $bot_info['detected'] ) {
-			$agent_id_header = $_SERVER['HTTP_X_APEIRON_AGENT_ID'] ?? '';
 			$log_id = $logger->log(
 				$bot_info,
 				$post_id,
 				$user_agent,
 				$_SERVER['REMOTE_ADDR'] ?? '',
-				$agent_id_header,
+				$apeiron_agent,
 				false,
 				'logged'
 			);
 		}
 
+		// ── Universal registry header check (all modes) ─────────────────────
+		// If any bot presents X-Apeiron headers in ANY mode, verify and mark.
+		// This ensures CarAI / registered agents are always logged as verified,
+		// even when the article runs in 'full' or 'ai_only' x402 mode.
+		if ( $bot_info['detected'] ) {
+			$agent_id_check = $_SERVER['HTTP_X_APEIRON_AGENT_ID'] ?? '';
+			$api_key_check  = $_SERVER['HTTP_X_APEIRON_API_KEY']  ?? '';
+			$ts_check       = $_SERVER['HTTP_X_APEIRON_TIMESTAMP'] ?? '';
+			$sig_check      = $_SERVER['HTTP_X_APEIRON_SIGNATURE'] ?? '';
+			$has_auth       = ( $ts_check && $sig_check ) || $api_key_check;
+
+			if ( $agent_id_check && $has_auth && in_array( $mode, [ 'full', 'ai_only' ], true ) ) {
+				// Cache key includes auth token. With HMAC, signature varies per request
+				// (different timestamp) so cache hits are rare — every request reaches the
+				// registry. That's the correct security trade-off.
+				$auth_token = ( $ts_check && $sig_check ) ? ( $ts_check . $sig_check ) : $api_key_check;
+				$cache_key  = 'apeiron_v_' . md5( $agent_id_check . $auth_token );
+				$cached     = get_transient( $cache_key );
+
+				if ( false !== $cached ) {
+					if ( $cached['verified'] ) {
+						header( 'X-Apeiron-Verified: true' );
+						header( 'X-Apeiron-Agent: ' . sanitize_text_field( $cached['agent_name'] ?? $agent_id_check ) );
+						$logger->mark_verified( $log_id, $agent_id_check, $cached['company_name'] ?? '', $cached['agent_name'] ?? '' );
+						$this->log_verified_access_async( $agent_id_check, $api_key_check, $post_id, $user_agent, false );
+					}
+				} else {
+					$result_check = $this->verify_with_registry( $agent_id_check, $api_key_check, $post_id, $user_agent, $mode );
+					$fail_open    = [ 'REGISTRY_UNREACHABLE', 'REGISTRY_ERROR', 'INVALID_RESPONSE', 'HTTPS_REQUIRED' ];
+					if ( ! in_array( $result_check['code'] ?? '', $fail_open, true ) ) {
+						$ttl = $result_check['verified'] ? self::VERIFY_CACHE_TTL : 300;
+						set_transient( $cache_key, $result_check, $ttl );
+					}
+					if ( $result_check['verified'] ) {
+						header( 'X-Apeiron-Verified: true' );
+						header( 'X-Apeiron-Agent: ' . sanitize_text_field( $result_check['agent_name'] ?? $agent_id_check ) );
+						$logger->mark_verified( $log_id, $agent_id_check, $result_check['company_name'] ?? '', $result_check['agent_name'] ?? '' );
+					}
+				}
+			}
+		}
+
 		// ── Registry modes ───────────────────────────────────────────────────
 		if ( in_array( $mode, [ 'registry_log', 'registry_block' ], true ) ) {
-			if ( ! preg_match( self::KNOWN_BOTS, $user_agent ) ) {
-				return; // umano → lascia passare
-			}
-
+			// Let through if: known bot UA, OR Apeiron auth headers present
 			$agent_id = $_SERVER['HTTP_X_APEIRON_AGENT_ID'] ?? '';
 			$api_key  = $_SERVER['HTTP_X_APEIRON_API_KEY']  ?? '';
+			$ts       = $_SERVER['HTTP_X_APEIRON_TIMESTAMP'] ?? '';
+			$sig      = $_SERVER['HTTP_X_APEIRON_SIGNATURE'] ?? '';
+			$has_auth = $agent_id && ( ( $ts && $sig ) || $api_key );
 
-			if ( $agent_id && $api_key ) {
-				$cache_key = 'apeiron_v_' . md5( $agent_id . $api_key );
-				$cached    = get_transient( $cache_key );
+			if ( ! preg_match( self::KNOWN_BOTS, $user_agent ) && ! $has_auth ) {
+				return; // umano senza credenziali → lascia passare
+			}
+
+			if ( $has_auth ) {
+				$auth_token = ( $ts && $sig ) ? ( $ts . $sig ) : $api_key;
+				$cache_key  = 'apeiron_v_' . md5( $agent_id . $auth_token );
+				$cached     = get_transient( $cache_key );
 
 				if ( false !== $cached ) {
 					if ( $cached['verified'] ) {
@@ -136,9 +200,10 @@ class Apeiron_Frontend {
 					'protocol'         => 'Apeiron Registry v1.0',
 					'register_url'     => 'https://www.apeiron-registry.com/register',
 					'standard_headers' => [
-						'X-Apeiron-Agent-ID' => 'your_agent_id',
-						'X-Apeiron-API-Key'  => 'your_api_key',
-						'X-Apeiron-Purpose'  => 'training|inference|search',
+						'X-Apeiron-Agent-ID'  => 'your_agent_id',
+						'X-Apeiron-Timestamp' => 'unix_seconds',
+						'X-Apeiron-Signature' => 'hmac_sha256_hex(v1\\n{ts}\\n{agent_id}\\n{url})',
+						'X-Apeiron-Purpose'   => 'training|inference|search',
 					],
 					'message' => 'Register your AI agent at www.apeiron-registry.com to access this content legally',
 				] );
@@ -211,34 +276,43 @@ class Apeiron_Frontend {
 		$registry_url    = get_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
 		$publisher_email = get_option( 'apeiron_publisher_email', '' );
 
-		// FIX 2: Enforce HTTPS — refuse to send API key over plaintext
+		// FIX 2: Enforce HTTPS — refuse to send credentials over plaintext
 		if ( strpos( $registry_url, 'https://' ) !== 0 ) {
 			error_log( 'Apeiron Registry: HTTPS required for verify endpoint. Refusing to send credentials over HTTP.' );
-			// Fail-open: allow access but don't verify
 			return [ 'verified' => true, 'code' => 'HTTPS_REQUIRED' ];
 		}
 
-		// FIX 3: Email debounce — check if we already notified for this agent today
 		$debounce_key  = 'apeiron_email_' . md5( $agent_id );
 		$should_notify = ( false === get_transient( $debounce_key ) );
+		$remote_ip     = $_SERVER['REMOTE_ADDR'] ?? '';
 
-		$remote_ip = $_SERVER['REMOTE_ADDR'] ?? '';
+		// Forward auth headers as received from the bot.
+		// HMAC mode (preferred): X-Apeiron-Timestamp + X-Apeiron-Signature
+		// Legacy mode: X-Apeiron-API-Key
+		$timestamp = $_SERVER['HTTP_X_APEIRON_TIMESTAMP'] ?? '';
+		$signature = $_SERVER['HTTP_X_APEIRON_SIGNATURE'] ?? '';
+
+		$headers = [
+			'X-Apeiron-Agent-ID'   => $agent_id,
+			'X-Content-URL'        => get_permalink( $post_id ),
+			'X-Content-Title'      => get_the_title( $post_id ),
+			'X-Publisher-Email'    => $publisher_email,
+			'X-Publisher-Wallet'   => get_option( 'apeiron_publisher_wallet', '' ),
+			'X-Agent-IP'           => $remote_ip,
+			'X-Agent-User-Agent'   => substr( $user_agent, 0, 500 ),
+			'X-Notify-Publisher'   => $should_notify ? 'true' : 'false',
+		];
+
+		if ( $timestamp && $signature ) {
+			$headers['X-Apeiron-Timestamp'] = $timestamp;
+			$headers['X-Apeiron-Signature'] = $signature;
+		} elseif ( $api_key ) {
+			$headers['X-Apeiron-API-Key'] = $api_key;
+		}
 
 		$response = wp_remote_post( $registry_url, [
-			'timeout' => self::API_TIMEOUT, // FIX 4: 2s max
-			'headers' => [
-				'X-Apeiron-Agent-ID'   => $agent_id,
-				'X-Apeiron-API-Key'    => $api_key,
-				'X-Content-URL'        => get_permalink( $post_id ),
-				'X-Content-Title'      => get_the_title( $post_id ),
-				'X-Publisher-Email'    => $publisher_email,
-				'X-Publisher-Wallet'   => get_option( 'apeiron_publisher_wallet', '' ),
-				// FIX 5: IP + User-Agent for provenance
-				'X-Agent-IP'           => $remote_ip,
-				'X-Agent-User-Agent'   => substr( $user_agent, 0, 500 ),
-				// FIX 3: Tell API whether to send email notification
-				'X-Notify-Publisher'   => $should_notify ? 'true' : 'false',
-			],
+			'timeout' => self::API_TIMEOUT,
+			'headers' => $headers,
 		] );
 
 		// Fail-open (registry_log) vs fail-closed (registry_block) on API errors
@@ -277,20 +351,30 @@ class Apeiron_Frontend {
 		$registry_url    = get_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
 		$publisher_email = get_option( 'apeiron_publisher_email', '' );
 
+		$timestamp = $_SERVER['HTTP_X_APEIRON_TIMESTAMP'] ?? '';
+		$signature = $_SERVER['HTTP_X_APEIRON_SIGNATURE'] ?? '';
+
+		$headers = [
+			'X-Apeiron-Agent-ID'   => $agent_id,
+			'X-Content-URL'        => get_permalink( $post_id ),
+			'X-Content-Title'      => get_the_title( $post_id ),
+			'X-Publisher-Email'    => $publisher_email,
+			'X-Agent-IP'           => $_SERVER['REMOTE_ADDR'] ?? '',
+			'X-Agent-User-Agent'   => substr( $user_agent, 0, 500 ),
+			'X-Notify-Publisher'   => $notify ? 'true' : 'false',
+			'X-Cache-Hit'          => 'true',
+		];
+		if ( $timestamp && $signature ) {
+			$headers['X-Apeiron-Timestamp'] = $timestamp;
+			$headers['X-Apeiron-Signature'] = $signature;
+		} elseif ( $api_key ) {
+			$headers['X-Apeiron-API-Key'] = $api_key;
+		}
+
 		wp_remote_post( $registry_url, [
 			'timeout'  => 5,
-			'blocking' => false, // fire and forget — don't slow down the response
-			'headers'  => [
-				'X-Apeiron-Agent-ID'   => $agent_id,
-				'X-Apeiron-API-Key'    => $api_key,
-				'X-Content-URL'        => get_permalink( $post_id ),
-				'X-Content-Title'      => get_the_title( $post_id ),
-				'X-Publisher-Email'    => $publisher_email,
-				'X-Agent-IP'           => $_SERVER['REMOTE_ADDR'] ?? '',
-				'X-Agent-User-Agent'   => substr( $user_agent, 0, 500 ),
-				'X-Notify-Publisher'   => $notify ? 'true' : 'false',
-				'X-Cache-Hit'          => 'true', // tell API this was cached
-			],
+			'blocking' => false,
+			'headers'  => $headers,
 		] );
 	}
 
