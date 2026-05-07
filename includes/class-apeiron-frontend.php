@@ -47,15 +47,15 @@ class Apeiron_Frontend {
 
 		$post_id    = get_the_ID();
 		$mode       = $this->get_mode( $post_id );
-		$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+		$user_agent = Apeiron_Helpers::get_user_agent();
 
 		// ── DETECT mode: always log every AI bot hit ──────────────────────────
 		$detector         = new Apeiron_Detector();
 		$bot_info         = $detector->detect( $user_agent );
-		$apeiron_agent    = $_SERVER['HTTP_X_APEIRON_AGENT_ID'] ?? '';
-		$apeiron_api_key  = $_SERVER['HTTP_X_APEIRON_API_KEY']  ?? '';
-		$apeiron_ts       = $_SERVER['HTTP_X_APEIRON_TIMESTAMP'] ?? '';
-		$apeiron_sig      = $_SERVER['HTTP_X_APEIRON_SIGNATURE'] ?? '';
+		$apeiron_agent    = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_AGENT_ID' );
+		$apeiron_api_key  = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_API_KEY' );
+		$apeiron_ts       = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_TIMESTAMP' );
+		$apeiron_sig      = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_SIGNATURE' );
 		$has_apeiron_auth = $apeiron_agent && ( ( $apeiron_ts && $apeiron_sig ) || $apeiron_api_key );
 		$log_id           = 0;
 		$logger           = new Apeiron_Logger();
@@ -77,7 +77,7 @@ class Apeiron_Frontend {
 				$bot_info,
 				$post_id,
 				$user_agent,
-				$_SERVER['REMOTE_ADDR'] ?? '',
+				Apeiron_Helpers::get_remote_ip(),
 				$apeiron_agent,
 				false,
 				'logged'
@@ -89,10 +89,10 @@ class Apeiron_Frontend {
 		// This ensures CarAI / registered agents are always logged as verified,
 		// even when the article runs in 'full' or 'ai_only' x402 mode.
 		if ( $bot_info['detected'] ) {
-			$agent_id_check = $_SERVER['HTTP_X_APEIRON_AGENT_ID'] ?? '';
-			$api_key_check  = $_SERVER['HTTP_X_APEIRON_API_KEY']  ?? '';
-			$ts_check       = $_SERVER['HTTP_X_APEIRON_TIMESTAMP'] ?? '';
-			$sig_check      = $_SERVER['HTTP_X_APEIRON_SIGNATURE'] ?? '';
+			$agent_id_check = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_AGENT_ID' );
+			$api_key_check  = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_API_KEY' );
+			$ts_check       = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_TIMESTAMP' );
+			$sig_check      = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_SIGNATURE' );
 			$has_auth       = ( $ts_check && $sig_check ) || $api_key_check;
 
 			if ( $agent_id_check && $has_auth && in_array( $mode, [ 'full', 'ai_only' ], true ) ) {
@@ -129,10 +129,10 @@ class Apeiron_Frontend {
 		// ── Registry modes ───────────────────────────────────────────────────
 		if ( in_array( $mode, [ 'registry_log', 'registry_block' ], true ) ) {
 			// Let through if: known bot UA, OR Apeiron auth headers present
-			$agent_id = $_SERVER['HTTP_X_APEIRON_AGENT_ID'] ?? '';
-			$api_key  = $_SERVER['HTTP_X_APEIRON_API_KEY']  ?? '';
-			$ts       = $_SERVER['HTTP_X_APEIRON_TIMESTAMP'] ?? '';
-			$sig      = $_SERVER['HTTP_X_APEIRON_SIGNATURE'] ?? '';
+			$agent_id = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_AGENT_ID' );
+			$api_key  = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_API_KEY' );
+			$ts       = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_TIMESTAMP' );
+			$sig      = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_SIGNATURE' );
 			$has_auth = $agent_id && ( ( $ts && $sig ) || $api_key );
 
 			if ( ! preg_match( self::KNOWN_BOTS, $user_agent ) && ! $has_auth ) {
@@ -224,7 +224,7 @@ class Apeiron_Frontend {
 			return;
 		}
 
-		$wallet = $_SERVER['HTTP_X_WALLET_ADDRESS'] ?? '';
+		$wallet = Apeiron_Helpers::get_header( 'HTTP_X_WALLET_ADDRESS' );
 		if ( $wallet && preg_match( '/^0x[0-9a-fA-F]{40}$/', $wallet ) ) {
 			$redirect = rest_url( 'apeiron/v1/content/' . $post_id );
 			wp_redirect( $redirect, 302 );
@@ -284,13 +284,13 @@ class Apeiron_Frontend {
 
 		$debounce_key  = 'apeiron_email_' . md5( $agent_id );
 		$should_notify = ( false === get_transient( $debounce_key ) );
-		$remote_ip     = $_SERVER['REMOTE_ADDR'] ?? '';
+		$remote_ip     = Apeiron_Helpers::get_remote_ip();
 
 		// Forward auth headers as received from the bot.
 		// HMAC mode (preferred): X-Apeiron-Timestamp + X-Apeiron-Signature
 		// Legacy mode: X-Apeiron-API-Key
-		$timestamp = $_SERVER['HTTP_X_APEIRON_TIMESTAMP'] ?? '';
-		$signature = $_SERVER['HTTP_X_APEIRON_SIGNATURE'] ?? '';
+		$timestamp = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_TIMESTAMP' );
+		$signature = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_SIGNATURE' );
 
 		$headers = [
 			'X-Apeiron-Agent-ID'   => $agent_id,
@@ -351,15 +351,15 @@ class Apeiron_Frontend {
 		$registry_url    = get_option( 'apeiron_registry_url', 'https://www.apeiron-registry.com/api/registry/verify' );
 		$publisher_email = get_option( 'apeiron_publisher_email', '' );
 
-		$timestamp = $_SERVER['HTTP_X_APEIRON_TIMESTAMP'] ?? '';
-		$signature = $_SERVER['HTTP_X_APEIRON_SIGNATURE'] ?? '';
+		$timestamp = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_TIMESTAMP' );
+		$signature = Apeiron_Helpers::get_header( 'HTTP_X_APEIRON_SIGNATURE' );
 
 		$headers = [
 			'X-Apeiron-Agent-ID'   => $agent_id,
 			'X-Content-URL'        => get_permalink( $post_id ),
 			'X-Content-Title'      => get_the_title( $post_id ),
 			'X-Publisher-Email'    => $publisher_email,
-			'X-Agent-IP'           => $_SERVER['REMOTE_ADDR'] ?? '',
+			'X-Agent-IP'           => Apeiron_Helpers::get_remote_ip(),
 			'X-Agent-User-Agent'   => substr( $user_agent, 0, 500 ),
 			'X-Notify-Publisher'   => $notify ? 'true' : 'false',
 			'X-Cache-Hit'          => 'true',
@@ -395,7 +395,7 @@ class Apeiron_Frontend {
 				'X-Content-URL'       => get_permalink( $post_id ),
 				'X-Content-Title'     => get_the_title( $post_id ),
 				'X-Publisher-Email'   => $publisher_email,
-				'X-Agent-IP'          => $_SERVER['REMOTE_ADDR'] ?? '',
+				'X-Agent-IP'          => Apeiron_Helpers::get_remote_ip(),
 				'X-Agent-User-Agent'  => substr( $user_agent, 0, 500 ),
 				'X-Notify-Publisher'  => 'false',
 			],

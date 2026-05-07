@@ -24,8 +24,8 @@ class Apeiron_Register {
 			wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'apeiron-web3-content-paywall' ) ], 403 );
 		}
 
-		$post_id    = isset( $_POST['post_id'] )    ? absint( $_POST['post_id'] ) : 0;
-		$content_id = isset( $_POST['content_id'] ) ? sanitize_text_field( wp_unslash( $_POST['content_id'] ) ) : '';
+		$post_id    = Apeiron_Helpers::get_post_int( 'post_id' );
+		$content_id = Apeiron_Helpers::get_post_text( 'content_id' );
 
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			wp_send_json_error( [ 'message' => __( 'Post not found.', 'apeiron-web3-content-paywall' ) ], 404 );
@@ -49,8 +49,8 @@ class Apeiron_Register {
 			wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'apeiron-web3-content-paywall' ) ], 403 );
 		}
 
-		$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
-		$tx_hash = isset( $_POST['tx_hash'] ) ? sanitize_text_field( wp_unslash( $_POST['tx_hash'] ) ) : '';
+		$post_id = Apeiron_Helpers::get_post_int( 'post_id' );
+		$tx_hash = Apeiron_Helpers::get_post_text( 'tx_hash' );
 
 		if ( ! $post_id || ! preg_match( '/^0x[0-9a-fA-F]{64}$/', $tx_hash ) ) {
 			wp_send_json_error( [ 'message' => __( 'Invalid data.', 'apeiron-web3-content-paywall' ) ], 400 );

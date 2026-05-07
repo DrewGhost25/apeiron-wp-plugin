@@ -20,7 +20,9 @@ class Apeiron_Logger {
 	public function log( array $bot, int $post_id, string $user_agent, string $ip, string $agent_id, bool $verified, string $action ): int {
 		global $wpdb;
 
-		$request_url = $post_id > 0 ? ( get_permalink( $post_id ) ?: sanitize_text_field( $_SERVER['REQUEST_URI'] ?? '' ) ) : sanitize_text_field( $_SERVER['REQUEST_URI'] ?? '' );
+		$request_url = $post_id > 0
+			? ( get_permalink( $post_id ) ?: Apeiron_Helpers::get_request_uri() )
+			: Apeiron_Helpers::get_request_uri();
 
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'apeiron_bot_log',

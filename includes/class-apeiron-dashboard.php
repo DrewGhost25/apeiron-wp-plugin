@@ -336,17 +336,20 @@ class Apeiron_Dashboard {
 
 		// Filtri dal form
 		$filters = [];
-		if ( ! empty( $_GET['bot_key'] ) ) {
-			$filters['bot_key'] = sanitize_text_field( wp_unslash( $_GET['bot_key'] ) );
+		$bot_key_filter = Apeiron_Helpers::get_get_text( 'bot_key' );
+		if ( '' !== $bot_key_filter ) {
+			$filters['bot_key'] = $bot_key_filter;
 		}
-		if ( isset( $_GET['is_registered_agent'] ) && $_GET['is_registered_agent'] !== '' ) {
-			$filters['is_registered_agent'] = (int) $_GET['is_registered_agent'];
+		$is_reg_agent = Apeiron_Helpers::get_get_text( 'is_registered_agent' );
+		if ( '' !== $is_reg_agent ) {
+			$filters['is_registered_agent'] = Apeiron_Helpers::get_get_int( 'is_registered_agent' );
 		}
-		if ( ! empty( $_GET['post_id'] ) ) {
-			$filters['post_id'] = (int) $_GET['post_id'];
+		$post_id_filter = Apeiron_Helpers::get_get_int( 'post_id' );
+		if ( $post_id_filter > 0 ) {
+			$filters['post_id'] = $post_id_filter;
 		}
 
-		$page   = max( 1, (int) ( $_GET['paged'] ?? 1 ) );
+		$page   = max( 1, Apeiron_Helpers::get_get_int( 'paged', 1 ) );
 		$limit  = 50;
 		$offset = ( $page - 1 ) * $limit;
 

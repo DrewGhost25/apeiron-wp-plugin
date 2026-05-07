@@ -452,7 +452,7 @@ class Apeiron_Admin {
 			: '1.00';
 
 		$preview_paras = isset( $_POST['apeiron_preview_paras'] )
-			? max( 1, min( 20, absint( $_POST['apeiron_preview_paras'] ) ) )
+			? max( 1, min( 20, absint( wp_unslash( $_POST['apeiron_preview_paras'] ) ) ) )
 			: 4;
 
 		update_post_meta( $post_id, '_apeiron_mode',          $mode );

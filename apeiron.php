@@ -3,7 +3,7 @@
  * Plugin Name:       Apeiron — AI Bot Tracker
  * Plugin URI:        https://apeiron-registry.com
  * Description:       Know which AI bots read your content. Detect, log, and optionally block or monetize AI bot access. Integrates with Apeiron Registry for agent identity verification.
- * Version:           2.1.0
+ * Version:           2.1.1
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            drewghost25
@@ -15,7 +15,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // ── Constants ────────────────────────────────────────────────────────────────
-define( 'APEIRON_VERSION',  '2.1.0' );
+define( 'APEIRON_VERSION',  '2.1.1' );
 define( 'APEIRON_PATH',     plugin_dir_path( __FILE__ ) );
 define( 'APEIRON_URL',      plugin_dir_url( __FILE__ ) );
 define( 'APEIRON_BASENAME', plugin_basename( __FILE__ ) );
@@ -27,6 +27,7 @@ define( 'APEIRON_DEFAULT_RPC',     'https://mainnet.base.org' );
 define( 'APEIRON_CHAIN_ID',        8453 ); // Base Mainnet
 
 // ── Load classes ─────────────────────────────────────────────────────────────
+require_once APEIRON_PATH . 'includes/class-apeiron-helpers.php';
 require_once APEIRON_PATH . 'includes/class-detector.php';
 require_once APEIRON_PATH . 'includes/class-logger.php';
 require_once APEIRON_PATH . 'includes/class-apeiron-admin.php';

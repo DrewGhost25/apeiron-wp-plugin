@@ -3,7 +3,7 @@ Contributors:      drewghost25
 Tags:              ai, bots, tracker, chatgpt, claude, crawler, analytics
 Requires at least: 5.8
 Tested up to:      6.9
-Stable tag:        2.1.0
+Stable tag:        2.1.1
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -116,6 +116,11 @@ License: MIT · [Source on GitHub](https://github.com/ethers-io/ethers.js)
 Note: ethers.js internally contains fallback URLs for Etherscan and other block explorers (e.g., `api.basescan.org`) for network detection purposes. These URLs are only contacted if you use ethers.js provider features that explicitly request blockchain data — the plugin does not trigger these calls automatically.
 
 == Changelog ==
+
+= 2.1.1 =
+* Security: All superglobal access (`$_SERVER`, `$_GET`, `$_POST`) now properly unslashed and sanitized per WordPress Coding Standards.
+* Refactor: Centralized superglobal access through new `Apeiron_Helpers` class.
+* No functional changes for end users.
 
 = 2.1.0 =
 * HMAC request signing for Apeiron Registry agents — bot signs each request locally with a signing secret that is never sent over the wire (replaces legacy API key in headers; legacy path kept for backward compatibility)
