@@ -462,11 +462,11 @@ class Apeiron_Dashboard {
 	private function get_protected_articles(): array {
 		// Includi tutti gli articoli registrati on-chain (hanno _apeiron_content_id)
 		// indipendentemente dalla modalità (ai_only, full, registry_log, ecc.)
-		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Necessary for registered content lookup; table is small.
 		$query = new WP_Query( [
 			'post_type'      => 'post',
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Necessary to lookup posts registered on-chain; results cached at calling layer.
 			'meta_query'     => [
 				[
 					'key'     => '_apeiron_content_id',
