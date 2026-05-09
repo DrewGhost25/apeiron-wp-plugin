@@ -227,7 +227,7 @@ class Apeiron_Frontend {
 		$wallet = Apeiron_Helpers::get_header( 'HTTP_X_WALLET_ADDRESS' );
 		if ( $wallet && preg_match( '/^0x[0-9a-fA-F]{40}$/', $wallet ) ) {
 			$redirect = rest_url( 'apeiron/v1/content/' . $post_id );
-			wp_redirect( $redirect, 302 );
+			wp_safe_redirect( $redirect, 302 );
 			exit;
 		}
 
@@ -278,7 +278,10 @@ class Apeiron_Frontend {
 
 		// FIX 2: Enforce HTTPS — refuse to send credentials over plaintext
 		if ( strpos( $registry_url, 'https://' ) !== 0 ) {
-			error_log( 'Apeiron Registry: HTTPS required for verify endpoint. Refusing to send credentials over HTTP.' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( 'Apeiron Registry: HTTPS required for verify endpoint. Refusing to send credentials over HTTP.' );
+			}
 			return [ 'verified' => true, 'code' => 'HTTPS_REQUIRED' ];
 		}
 
@@ -319,14 +322,20 @@ class Apeiron_Frontend {
 		$fail_verified = ( 'registry_block' !== $mode );
 
 		if ( is_wp_error( $response ) ) {
-			error_log( 'Apeiron Registry: API unreachable (' . $response->get_error_message() . '). ' . ( $fail_verified ? 'Failing open.' : 'Failing closed (registry_block).' ) );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( 'Apeiron Registry: API unreachable (' . $response->get_error_message() . '). ' . ( $fail_verified ? 'Failing open.' : 'Failing closed (registry_block).' ) );
+			}
 			return [ 'verified' => $fail_verified, 'code' => 'REGISTRY_UNREACHABLE' ];
 		}
 
 		$http_code = wp_remote_retrieve_response_code( $response );
 
 		if ( $http_code >= 500 ) {
-			error_log( 'Apeiron Registry: API returned ' . $http_code . '. ' . ( $fail_verified ? 'Failing open.' : 'Failing closed.' ) );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( 'Apeiron Registry: API returned ' . $http_code . '. ' . ( $fail_verified ? 'Failing open.' : 'Failing closed.' ) );
+			}
 			return [ 'verified' => $fail_verified, 'code' => 'REGISTRY_ERROR' ];
 		}
 

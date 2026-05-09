@@ -70,10 +70,10 @@ class Apeiron_Helpers {
 	 * @return string Sanitized string value.
 	 */
 	public static function get_post_text( string $key, string $default = '' ): string {
-		if ( ! isset( $_POST[ $key ] ) ) {
+		if ( ! isset( $_POST[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			return $default;
 		}
-		return sanitize_text_field( wp_unslash( $_POST[ $key ] ) );
+		return sanitize_text_field( wp_unslash( $_POST[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
@@ -84,10 +84,10 @@ class Apeiron_Helpers {
 	 * @return int Sanitized integer value.
 	 */
 	public static function get_post_int( string $key, int $default = 0 ): int {
-		if ( ! isset( $_POST[ $key ] ) ) {
+		if ( ! isset( $_POST[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			return $default;
 		}
-		return absint( wp_unslash( $_POST[ $key ] ) );
+		return absint( wp_unslash( $_POST[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
@@ -98,10 +98,10 @@ class Apeiron_Helpers {
 	 * @return string Sanitized string value.
 	 */
 	public static function get_get_text( string $key, string $default = '' ): string {
-		if ( ! isset( $_GET[ $key ] ) ) {
+		if ( ! isset( $_GET[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return $default;
 		}
-		return sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
+		return sanitize_text_field( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -112,9 +112,9 @@ class Apeiron_Helpers {
 	 * @return int Sanitized integer value.
 	 */
 	public static function get_get_int( string $key, int $default = 0 ): int {
-		if ( ! isset( $_GET[ $key ] ) ) {
+		if ( ! isset( $_GET[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return $default;
 		}
-		return absint( wp_unslash( $_GET[ $key ] ) );
+		return absint( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 }

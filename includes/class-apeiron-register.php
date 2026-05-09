@@ -21,18 +21,18 @@ class Apeiron_Register {
 		check_ajax_referer( 'apeiron_register', 'nonce' );
 
 		if ( ! current_user_can( 'edit_posts' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'apeiron-web3-content-paywall' ) ], 403 );
+			wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'apeiron-ai-bot-tracker' ) ], 403 );
 		}
 
 		$post_id    = Apeiron_Helpers::get_post_int( 'post_id' );
 		$content_id = Apeiron_Helpers::get_post_text( 'content_id' );
 
 		if ( ! $post_id || ! get_post( $post_id ) ) {
-			wp_send_json_error( [ 'message' => __( 'Post not found.', 'apeiron-web3-content-paywall' ) ], 404 );
+			wp_send_json_error( [ 'message' => __( 'Post not found.', 'apeiron-ai-bot-tracker' ) ], 404 );
 		}
 
 		if ( ! preg_match( '/^0x[0-9a-fA-F]{64}$/', $content_id ) ) {
-			wp_send_json_error( [ 'message' => __( 'Invalid contentId.', 'apeiron-web3-content-paywall' ) ], 400 );
+			wp_send_json_error( [ 'message' => __( 'Invalid contentId.', 'apeiron-ai-bot-tracker' ) ], 400 );
 		}
 
 		update_post_meta( $post_id, '_apeiron_content_id', $content_id );
@@ -46,20 +46,20 @@ class Apeiron_Register {
 		check_ajax_referer( 'apeiron_register', 'nonce' );
 
 		if ( ! current_user_can( 'edit_posts' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'apeiron-web3-content-paywall' ) ], 403 );
+			wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'apeiron-ai-bot-tracker' ) ], 403 );
 		}
 
 		$post_id = Apeiron_Helpers::get_post_int( 'post_id' );
 		$tx_hash = Apeiron_Helpers::get_post_text( 'tx_hash' );
 
 		if ( ! $post_id || ! preg_match( '/^0x[0-9a-fA-F]{64}$/', $tx_hash ) ) {
-			wp_send_json_error( [ 'message' => __( 'Invalid data.', 'apeiron-web3-content-paywall' ) ], 400 );
+			wp_send_json_error( [ 'message' => __( 'Invalid data.', 'apeiron-ai-bot-tracker' ) ], 400 );
 		}
 
 		update_post_meta( $post_id, '_apeiron_registered', '1' );
 		update_post_meta( $post_id, '_apeiron_register_tx', $tx_hash );
 
-		wp_send_json_success( [ 'message' => __( 'Registration saved.', 'apeiron-web3-content-paywall' ), 'txHash' => $tx_hash ] );
+		wp_send_json_success( [ 'message' => __( 'Registration saved.', 'apeiron-ai-bot-tracker' ), 'txHash' => $tx_hash ] );
 	}
 
 }

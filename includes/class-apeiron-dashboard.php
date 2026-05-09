@@ -93,12 +93,19 @@ class Apeiron_Dashboard {
 		$verified_agents = (int) $stats['verified_agents'];
 
 		global $wpdb;
-		$pages_scanned = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(DISTINCT request_url) FROM {$wpdb->prefix}apeiron_bot_log WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)",
-				7
-			)
-		);
+		$pages_scanned_cache_key = 'apeiron_pages_scanned_7';
+		$pages_scanned           = wp_cache_get( $pages_scanned_cache_key, 'apeiron' );
+		if ( false === $pages_scanned ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$pages_scanned = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(DISTINCT request_url) FROM `{$wpdb->prefix}apeiron_bot_log` WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)",
+					7
+				)
+			);
+			wp_cache_set( $pages_scanned_cache_key, $pages_scanned, 'apeiron', 300 );
+		}
+		$pages_scanned = (int) $pages_scanned;
 		?>
 		<div class="wrap apeiron-dashboard-wrap">
 
@@ -120,7 +127,7 @@ class Apeiron_Dashboard {
 				$names = array_map( function( $b ) {
 					return esc_html( $b['bot_name'] );
 				}, $new_bots );
-				echo implode( ', ', $names );
+				echo esc_html( implode( ', ', $names ) );
 				?>
 			</div>
 			<?php endif; ?>
@@ -429,7 +436,7 @@ class Apeiron_Dashboard {
 
 			<?php if ( count( $rows ) === $limit ) : ?>
 			<div style="margin-top:12px">
-				<a href="<?php echo esc_url( add_query_arg( array_merge( $_GET, [ 'paged' => $page + 1 ] ) ) ); ?>" class="button"><?php esc_html_e( 'Next page →', 'apeiron-ai-bot-tracker' ); ?></a>
+				<a href="<?php echo esc_url( add_query_arg( [ 'paged' => $page + 1 ] ) ); ?>" class="button"><?php esc_html_e( 'Next page →', 'apeiron-ai-bot-tracker' ); ?></a>
 			</div>
 			<?php endif; ?>
 
@@ -455,6 +462,7 @@ class Apeiron_Dashboard {
 	private function get_protected_articles(): array {
 		// Includi tutti gli articoli registrati on-chain (hanno _apeiron_content_id)
 		// indipendentemente dalla modalità (ai_only, full, registry_log, ecc.)
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Necessary for registered content lookup; table is small.
 		$query = new WP_Query( [
 			'post_type'      => 'post',
 			'post_status'    => 'publish',

@@ -24,6 +24,7 @@ class Apeiron_Logger {
 			? ( get_permalink( $post_id ) ?: Apeiron_Helpers::get_request_uri() )
 			: Apeiron_Helpers::get_request_uri();
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'apeiron_bot_log',
 			[
@@ -47,7 +48,10 @@ class Apeiron_Logger {
 		);
 
 		if ( false === $result ) {
-			error_log( 'Apeiron Logger: DB insert failed — ' . $wpdb->last_error );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( 'Apeiron Logger: DB insert failed — ' . $wpdb->last_error );
+			}
 			return 0;
 		}
 		return (int) $wpdb->insert_id;
@@ -80,6 +84,7 @@ class Apeiron_Logger {
 		$data['bot_company'] = sanitize_text_field( $company_name ?: 'Private' );
 		$format[]            = '%s';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			$wpdb->prefix . 'apeiron_bot_log',
 			$data,
@@ -97,8 +102,16 @@ class Apeiron_Logger {
 	 */
 	public function get_stats( int $days = 7 ): array {
 		global $wpdb;
+
+		$cache_key = 'apeiron_stats_' . intval( $days );
+		$cached    = wp_cache_get( $cache_key, 'apeiron' );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		$table = $wpdb->prefix . 'apeiron_bot_log';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$total_requests = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM `{$table}` WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)",
@@ -106,6 +119,7 @@ class Apeiron_Logger {
 			)
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$unique_bots = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(DISTINCT bot_key) FROM `{$table}` WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY) AND bot_key != ''",
@@ -113,6 +127,7 @@ class Apeiron_Logger {
 			)
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$verified_agents = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM `{$table}` WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY) AND is_registered_agent = 1",
@@ -120,6 +135,7 @@ class Apeiron_Logger {
 			)
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$top_bots_raw = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT bot_name, bot_key, bot_company, COUNT(*) AS `count`
@@ -134,6 +150,7 @@ class Apeiron_Logger {
 		);
 		$top_bots = is_array( $top_bots_raw ) ? $top_bots_raw : [];
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$top_content_raw = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT post_id, COUNT(*) AS `count`
@@ -157,13 +174,16 @@ class Apeiron_Logger {
 			}
 		}
 
-		return [
+		$result = [
 			'total_requests'  => $total_requests,
 			'unique_bots'     => $unique_bots,
 			'verified_agents' => $verified_agents,
 			'top_bots'        => $top_bots,
 			'top_content'     => $top_content,
 		];
+
+		wp_cache_set( $cache_key, $result, 'apeiron', 300 );
+		return $result;
 	}
 
 	/**
@@ -176,6 +196,13 @@ class Apeiron_Logger {
 	 */
 	public function get_activity( int $limit = 50, int $offset = 0, array $filters = [] ): array {
 		global $wpdb;
+
+		$cache_key = 'apeiron_activity_' . md5( serialize( $filters ) . $limit . $offset );
+		$cached    = wp_cache_get( $cache_key, 'apeiron' );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		$table  = $wpdb->prefix . 'apeiron_bot_log';
 		$where  = [];
 		$values = [];
@@ -200,15 +227,18 @@ class Apeiron_Logger {
 		$values[] = $limit;
 		$values[] = $offset;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM `{$table}` {$where_sql} ORDER BY created_at DESC LIMIT %d OFFSET %d",
+				"SELECT * FROM `{$table}` {$where_sql} ORDER BY created_at DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				...$values
 			),
 			ARRAY_A
 		);
 
-		return is_array( $rows ) ? $rows : [];
+		$result = is_array( $rows ) ? $rows : [];
+		wp_cache_set( $cache_key, $result, 'apeiron', 60 );
+		return $result;
 	}
 
 	/**
@@ -221,6 +251,7 @@ class Apeiron_Logger {
 		global $wpdb;
 		$table = $wpdb->prefix . 'apeiron_bot_log';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT bot_key, bot_name, bot_company, MIN(created_at) AS first_seen
@@ -244,6 +275,7 @@ class Apeiron_Logger {
 	 */
 	public function cleanup_old_logs( int $days = 90 ): void {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM `{$wpdb->prefix}apeiron_bot_log` WHERE created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",

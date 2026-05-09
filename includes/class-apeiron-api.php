@@ -213,7 +213,7 @@ class Apeiron_Api {
 		return new WP_REST_Response( [
 			'postId'     => $post->ID,
 			'title'      => $post->post_title,
-			'body'       => wp_strip_all_tags( apply_filters( 'the_content', $post->post_content ) ),
+			'body'       => wp_strip_all_tags( apply_filters( 'the_content', $post->post_content ) ), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core WP filter, not plugin-defined.
 			'url'        => get_permalink( $post->ID ),
 			'author'     => get_the_author_meta( 'display_name', $post->post_author ),
 			'date'       => $post->post_date,

@@ -1,6 +1,6 @@
 === Apeiron — AI Bot Tracker ===
 Contributors:      drewghost25
-Tags:              ai, bots, tracker, chatgpt, claude, crawler, analytics
+Tags:              ai bot, bot tracker, content protection, web3, x402
 Requires at least: 5.8
 Tested up to:      6.9
 Stable tag:        2.1.1
