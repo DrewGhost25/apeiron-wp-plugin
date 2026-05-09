@@ -289,6 +289,14 @@
 	margin-top:  -10px;
 }
 
+/* ── Forza colore titoli (override WordPress admin grey) ────── */
+
+.apeiron-dashboard-wrap h1,
+.apeiron-dashboard-wrap h2,
+.apeiron-dashboard-wrap h3 {
+	color: #ffffff;
+}
+
 /* ── Header ─────────────────────────────────────────────────── */
 
 .apeiron-dash-header {

@@ -554,7 +554,7 @@ class Apeiron_Dashboard {
 				<div style="display:flex;gap:20px;margin-bottom:28px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:6px;padding:20px 24px">
 					<div style="font-size:28px;font-weight:700;color:#8a6830;min-width:40px;line-height:1.2"><?php echo esc_html( $step['n'] ); ?></div>
 					<div style="flex:1">
-						<h3 style="margin:0 0 8px;font-size:15px;color:#e8e0d0"><?php echo esc_html( $step['title'] ); ?></h3>
+						<h3 style="margin:0 0 8px;font-size:15px;color:#ffffff"><?php echo esc_html( $step['title'] ); ?></h3>
 						<?php if ( $step['body'] ) : ?>
 							<p style="color:#9a9490;margin:0;line-height:1.6;font-size:13px"><?php echo wp_kses( $step['body'], [ 'a' => [ 'href' => [] ], 'strong' => [], 'code' => [] ] ); ?></p>
 						<?php endif; ?>
@@ -562,7 +562,7 @@ class Apeiron_Dashboard {
 							<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
 								<?php foreach ( $step['modes'] as $mode ) : ?>
 								<div style="background:#111;border-left:3px solid #8a6830;padding:10px 14px;border-radius:3px">
-									<strong style="color:#e8e0d0;font-size:13px"><?php echo esc_html( $mode['icon'] . ' ' . $mode['name'] ); ?></strong>
+									<strong style="color:#ffffff;font-size:13px"><?php echo esc_html( $mode['icon'] . ' ' . $mode['name'] ); ?></strong>
 									<p style="margin:4px 0 0;color:#9a9490;font-size:12px;line-height:1.5"><?php echo wp_kses( $mode['desc'], [ 'strong' => [], 'code' => [] ] ); ?></p>
 								</div>
 								<?php endforeach; ?>
